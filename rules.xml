@@ -1,0 +1,14 @@
+<xml>
+        <fold name="randomness">
+                <param name="starting_epsilon" values="0.05,0.1,0.15,0.2,0.25" />
+                <param name="ending_epsilon" values="0.01,0.05,0.1,0.15,0.2" />
+                <param name="stepness_epsilon" values="0.999,0.9999,0.99999" />
+                <rule constraint="ending_epsilon &lt; starting_epsilon" />
+        </fold>
+        <fold name="neuralnetwork">
+                <param name="hidden_unit" values="40,55,70,85,100" />
+        </fold>
+        <fold name="trace">
+                <param name="replay" values="0,1,2,3,4" />
+        </fold>
+</xml>
