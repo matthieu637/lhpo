@@ -1,10 +1,13 @@
 #!/usr/bin/octave -qf
 
+arg_list = argv();
+file = arg_list{1};
+
 dirs=glob('./[._0-9]*');
 
 index=1;
 for i=1:length(dirs)
-	X=load(strcat(dirs{i,1}, '/statRL_NN.dat'));
+	X=load(strcat(dirs{i,1}, '/', file));
 	X = mean(X);
 	headers=strsplit(strrep(dirs{i, 1},'./',''),'_');
 	Z=length(headers);
