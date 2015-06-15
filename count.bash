@@ -14,6 +14,8 @@ for dir in $directories ; do
 			empty=`expr $empty + 1`
 		elif [[ -e $dir/$setup && ! -e $dir/$setup/$END_FILE ]] ; then
 			running=`expr $running + 1`
+			cat $dir/$setup/host
+			echo $setup
 		elif [[ -e $dir/$setup && -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
 		fi
