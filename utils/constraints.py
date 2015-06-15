@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import fileinput
 import sys
@@ -34,5 +35,6 @@ for rule in open(sys.argv[1]).readlines():
 print(headers)
 for i in range(0, len(dico[headers[0]])):
 	for h in headers:
-		print(dico[h][i] ,end="_")
+		print(dico[h][i], end="_")
 	print()
+
