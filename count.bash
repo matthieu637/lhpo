@@ -1,10 +1,13 @@
 #!/bin/bash
 
+. ./utils/functions.bash
+cdIntoFirstArg $@
+
 running=0
 empty=0
 finished=0
 
-END_FILE="time_elapsed"
+END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
 
 directories=`cat rules.out`
 for dir in $directories ; do
@@ -14,8 +17,8 @@ for dir in $directories ; do
 			empty=`expr $empty + 1`
 		elif [[ -e $dir/$setup && ! -e $dir/$setup/$END_FILE ]] ; then
 			running=`expr $running + 1`
-			cat $dir/$setup/host
-			echo $setup
+#			cat $dir/$setup/host
+#			echo $setup
 		elif [[ -e $dir/$setup && -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
 		fi

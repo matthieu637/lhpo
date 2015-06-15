@@ -1,5 +1,8 @@
 #!/bin/bash
 
+. ./utils/functions.bash
+cdIntoFirstArg $@
+
 if [ ! -e rules.out ] ; then
 	exit 0
 fi

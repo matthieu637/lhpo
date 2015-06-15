@@ -1,5 +1,8 @@
 #!/bin/bash
 
+. ./utils/functions.bash
+cdIntoFirstArg $@
+
 if [ ! -e rules.xml  ] ; then
 	echo "rules.xml missing."
 	exit 1
@@ -24,7 +27,7 @@ for fold in $folds ; do
 	done
 
 	#enumeration
-	cat $fold/mixer | ./utils/enumerate.py >> $fold/rules.out
+	cat $fold/mixer | $LHPO_PATH/utils/enumerate.py >> $fold/rules.out
 	sed -i "s/'//g" $fold/rules.out
 	sed -i "s/[[]//g" $fold/rules.out
 	sed -i "s/[]]//g" $fold/rules.out
@@ -51,7 +54,7 @@ for fold in $folds ; do
 	fi
 	
 	tmp=`mktemp`
-	cat $fold/rules.out | ./utils/constraints.py $fold/mixer > $tmp
+	cat $fold/rules.out | $LHPO_PATH/utils/constraints.py $fold/mixer > $tmp
 	mv $tmp $fold/mixer
 	mv $fold/mixer $fold/rules.out
         sed -i "s/'//g" $fold/rules.out
@@ -65,3 +68,4 @@ for fold in $folds ; do
 done
 
 echo "$folds" | sed -e 's/ //g' > rules.out
+

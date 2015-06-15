@@ -1,4 +1,25 @@
 <xml>
+	<!--
+		Your executable.
+	-->
+	<command value="../../../build/default/exp/kbexploit/RLNNACST_novisu" />
+
+	<!--
+		Arguments to pass to your command.
+	-->
+	<args value="--map ../../../exp/kbexploit/data/arena/small/d_b2_c2.pbm --instances 0 --instances 1" />
+
+	<!--
+		Your command reads this file for hyper-parameters.
+	-->
+	<ini_file value="config.ini" />
+
+	<!-- 
+		The file that the command will generate once it finished.
+		Required if you want to monitor progress with count.bash
+	-->
+	<end_file value="time_elapsed" />
+
         <fold name="randomness">
                 <param name="starting_epsilon" values="0.05,0.1,0.15,0.2,0.25" />
                 <param name="ending_epsilon" values="0.01,0.05,0.1,0.15,0.2" />

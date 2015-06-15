@@ -1,8 +1,7 @@
 #!/bin/bash
 
-COMMAND="../../../build/default/exp/kbexploit/RLNNACST_novisu"
-ARGS="--map ../../../exp/kbexploit/data/arena/small/d_b2_c2.pbm --instances 0 --instances 1 --na 17 --actions ../../../exp/kbexploit/data/actions/human_linear_s15_n17 --state ../../../exp/kbexploit/data/states/final_52human"
-CONFIG_FILE="config.ini"
+. ./utils/functions.bash
+cdIntoFirstArg $@
 
 function cpFileFromArgs(){
         destination=$1
@@ -19,6 +18,15 @@ function cpFileFromArgs(){
             fi
         done
 }
+
+if [ ! -e rules.out ] ; then
+	echo "Please run parsing_rules first"
+	exit 1
+fi
+
+COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
+ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
+CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 
 directories=`cat rules.out`
 for dir in $directories ; do
