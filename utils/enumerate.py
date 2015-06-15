@@ -11,7 +11,13 @@ def listeproduit(L):
 
 tab=[];
 for line in fileinput.input():
-	tab.append(line.replace('\n','').split(','))
+	rline = line.replace('\n','');
+	if rline.count(',') != 0:
+		tab.append(rline.split(','))
+	elif rline.count(':') != 0:
+		begin=rline.split(':')[0]
+		end=rline.split(':')[1]
+		tab.append([i for i in range(int(begin),int(end))])
 
 for line in listeproduit(tab):
 	print(line)
