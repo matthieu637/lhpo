@@ -1,12 +1,15 @@
 %f version
-function final = load_dirs (file)
-	valid_dirs = glob(strcat('./[._0-9]*/', file));
+function final = load_dirs (beforef,endf, column, save_best)
+	valid_dirs = glob(strcat('./', beforef, '[._0-9]*/', endf));
 
 %  	valid_dirs
 
 	for i=1:length(valid_dirs) 
 		valid_dir = valid_dirs{i,1};
 		X{i} = load(valid_dir);
+		if save_best
+			X{i} = save_best_policy(X{i}')';
+		endif
 	endfor
 
 	if(length(valid_dirs) == 0)
@@ -32,23 +35,10 @@ function final = load_dirs (file)
 
 %  	keyboard
 	
-	if( minRequired == 0)
-	  final=zeros(size(X{i}));
-	  %size(final)
-	  for i=1:length(valid_dirs)
-		  final += X{i};
-	  endfor
-	  %size(final)
-	else
-	  final=zeros(mmin, size(X{i}, 2));
-	  %size(final)
-	  for i=1:length(valid_dirs)
-		  final += X{i}(1:mmin, :);
-	  endfor
-	  %size(final)
-	endif
-
-	final = final / length(valid_dirs);
+  final=zeros(length(valid_dirs), mmin);
+  for i=1:length(valid_dirs)
+          final(i,:) = X{i}(1:mmin,column);
+  endfor
 
 endfunction
 
