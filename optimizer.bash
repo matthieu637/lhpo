@@ -1,6 +1,8 @@
 #!/bin/bash
 
 . ./utils/functions.bash
+. ./utils/job_pool.sh
+
 cdIntoFirstArg $@
 
 function cpFileFromArgs(){
@@ -24,10 +26,20 @@ if [ ! -e rules.out ] ; then
 	exit 1
 fi
 
-COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
-ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
-CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
+max_cpu=$(nbcpu)
+if [[ $# -eq 2 && $2 -le $max_cpu && $2 -gt 0 ]] ; then
+	CPU=$2
+else
+	CPU=$max_cpu
+fi
+echo "Number of thread set to $CPU."
 
+export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
+export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
+export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
+
+function thread_run()
+{
 directories=`cat rules.out`
 for dir in $directories ; do
 	cat $dir/rules.out | sed -e '1d' | while read setup ; do
@@ -65,4 +77,21 @@ for dir in $directories ; do
 		fi
 	done
 done
+}
+
+if [ $CPU -ne 1 ]; then
+
+	job_pool_init $CPU 0
+	for i in $(seq 0 1 ${CPU})
+	do
+		job_pool_run thread_run
+		sleep 2
+	done
+
+	job_pool_wait
+	job_pool_shutdown
+
+else
+	thread_run
+fi
 

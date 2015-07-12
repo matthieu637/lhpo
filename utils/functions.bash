@@ -2,7 +2,7 @@
 
 function cdIntoFirstArg(){
 
-if [ ! $# -eq 1 ] ; then
+if [ $# -lt 1 ] ; then
         echo "Usage : $0 <dir>"
         echo "  <dir> containing a rules.xml"
         exit 1
@@ -17,3 +17,8 @@ export LHPO_PATH=$(pwd)
 cd $1
 
 }
+
+function nbcpu(){
+	cat /proc/cpuinfo | grep processor | wc -l
+}
+
