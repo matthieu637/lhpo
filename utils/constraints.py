@@ -9,6 +9,7 @@ dico={}
 headers=[]
 firstline=True
 for line in sys.stdin.readlines():
+	#sys.stderr.write(line);
 	if firstline:
 		for val in line.replace('\n','').split(' '):
 			dico[val]=[]

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import fileinput
+import sys
 
 def listeproduit(L):
 	if len(L)==0: # produit vide
@@ -12,6 +13,7 @@ def listeproduit(L):
 
 tab=[];
 for line in fileinput.input():
+#	sys.stderr.write(line); 
 	rline = line.replace('\n','');
 	if rline.count(',') != 0:
 		tab.append(rline.split(','))
@@ -19,6 +21,8 @@ for line in fileinput.input():
 		begin=rline.split(':')[0]
 		end=rline.split(':')[1]
 		tab.append([i for i in range(int(begin),int(end))])
+	else: 
+		tab.append([rline])
 
 for line in listeproduit(tab):
 	print(line)
