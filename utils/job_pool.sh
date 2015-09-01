@@ -34,6 +34,7 @@ job_pool_job_queue=/tmp/job_pool_job_queue_$$
 
 # where to run results to
 job_pool_result_log=/tmp/job_pool_result_log_$$
+job_pool_result_queue=/tmp/job_pool_result_queue_$$
 
 # toggle command echoing
 job_pool_echo_command=0
@@ -53,14 +54,14 @@ job_pool_nerrors=0
 function _job_pool_echo()
 {
     if [[ "${job_pool_echo_command}" == "1" ]]; then
-echo $@
+	echo $@
     fi
 }
 
 # \brief cleans up
 function _job_pool_cleanup()
 {
-    rm -f ${job_pool_job_queue} ${job_pool_result_log}
+    rm -f ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue}
 }
 
 # \brief signal handler
@@ -86,7 +87,8 @@ function _job_pool_worker()
 {
     local id=$1
     local job_queue=$2
-    local result_log=$3
+    local result_queue=$3
+    local result_log=$4
     local line=
 
     exec 7<> ${job_queue}
@@ -115,8 +117,10 @@ status=ERROR
             # now write the error to the log, making sure multiple processes
             # don't trample over each other.
             exec 8<> ${result_log}
+            exec 8<> ${result_queue}
             flock --exclusive 8
-#             echo "${status}job_pool: exited ${result}: ${line}" >> ${result_log}
+            echo "${status}job_pool: exited ${result}: ${line}" >> ${result_log}
+            echo "${status}job_pool: exited ${result}: ${line}" >> ${result_queue}
             flock --unlock 8
             exec 8>&-
             _job_pool_echo "### _job_pool_worker-${id}: exited ${result}: ${line}"
@@ -140,9 +144,10 @@ function _job_pool_stop_workers()
 function _job_pool_start_workers()
 {
     local job_queue=$1
-    local result_log=$2
+    local result_queue=$2
+    local result_log=$3
     for ((i=0; i<${job_pool_pool_size}; i++)); do
-_job_pool_worker ${i} ${job_queue} ${result_log} &
+	_job_pool_worker ${i} ${job_queue} ${result_queue} ${result_log} &
     done
 }
 
@@ -158,24 +163,28 @@ function job_pool_init()
     local pool_size=$1
     local echo_command=$2
 
+    export JOBPOOL_CPU=$pool_size
+    export JOBPOOL_TODO=0
+
     # set the global attibutes
     job_pool_pool_size=${pool_size:=1}
     job_pool_echo_command=${echo_command:=0}
 
     # create the fifo job queue and create the exit code log
-    rm -rf ${job_pool_job_queue} ${job_pool_result_log}
+    rm -rf ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue}
     mkfifo ${job_pool_job_queue}
+    mkfifo ${job_pool_result_queue}
     touch ${job_pool_result_log}
 
     # fork off the workers
-    _job_pool_start_workers ${job_pool_job_queue} ${job_pool_result_log}
+    _job_pool_start_workers ${job_pool_job_queue} ${job_pool_result_queue} ${job_pool_result_log}
 }
 
 # \brief waits for all queued up jobs to complete and shuts down the job pool
 function job_pool_shutdown()
 {
     _job_pool_stop_workers
-    _job_pool_print_result_log
+#    _job_pool_print_result_log
     _job_pool_cleanup
 }
 
@@ -183,9 +192,11 @@ function job_pool_shutdown()
 function job_pool_run()
 {
     if [[ "${job_pool_pool_size}" == "-1" ]]; then
-job_pool_init
+	job_pool_init
     fi
-echo $@ >> ${job_pool_job_queue}
+    
+    export JOBPOOL_TODO=`expr $JOBPOOL_TODO + 1`
+    echo $@ >> ${job_pool_job_queue}
 }
 
 # \brief waits for all queued up jobs to complete before starting new jobs
@@ -194,6 +205,21 @@ echo $@ >> ${job_pool_job_queue}
 function job_pool_wait()
 {
     _job_pool_stop_workers
-    _job_pool_start_workers ${job_pool_job_queue} ${job_pool_result_log}
+    _job_pool_start_workers ${job_pool_job_queue} ${job_pool_result_queue}  ${job_pool_result_log} 
 }
 
+function wait_free_ressources(){
+   nbdone=`cat ${job_pool_result_log} | wc -l`
+   reach=`expr $JOBPOOL_CPU + $nbdone`
+
+#   echo "$nbdone $reach $JOBPOOL_TODO"
+   while [ $reach -lt $JOBPOOL_TODO ] ; do
+#   	   echo "waiting"
+	   read line < ${job_pool_result_queue}
+   	   nbdone=`cat ${job_pool_result_log} | wc -l`
+   	   reach=`expr $JOBPOOL_CPU + $nbdone`
+   	   #echo "$nbdone $reach $JOBPOOL_TODO"
+   done
+
+#   echo "stop waiting"
+}
