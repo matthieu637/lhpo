@@ -77,11 +77,12 @@ if [ $CPU -ne 1 ]; then
 	job_pool_init $CPU 0
 fi
 
+#full passage of %100
 directories=`cat rules.out`
 for dir in $directories ; do
 	parameters=`head -1 $dir/rules.out`
 
-	cat $dir/rules.out | sed -e '1d' | while read setup ; do
+	cat $dir/rules.out | sed -e '1d' | shuf | while read setup ; do
 		if [ $CPU -ne 1 ] ; then
 			wait_free_ressources
 		fi
