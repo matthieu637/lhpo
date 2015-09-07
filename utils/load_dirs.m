@@ -1,5 +1,5 @@
 %f version
-function final = load_dirs (beforef,endf, column, save_best)
+function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
 	valid_dirs = glob(strcat(beforef, '[._0-9]*/', endf));
 
 %  	valid_dirs
@@ -9,14 +9,14 @@ if length(pk = pkg('list', 'parallel')) == 0
 		valid_dir = valid_dirs{i,1};
 		X{i} = load(valid_dir)(:,column);
 		if save_best
-			X{i} = save_best_policy(X{i}')';
+			X{i} = save_best_policy(X{i}', higher_better)';
 		endif
 	endfor
 else
 	pkg load parallel
 	vector_x=1:length(valid_dirs);
 	if save_best
-		fun = @(x) save_best_policy((load(valid_dirs{x,1})(:,column))')';
+		fun = @(x) save_best_policy((load(valid_dirs{x,1})(:,column))', higher_better)';
 	else
 		fun = @(x) load(valid_dirs{x,1})(:,column);
 	endif

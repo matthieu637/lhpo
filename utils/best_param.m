@@ -5,6 +5,7 @@ file_to_load=arg_list{1};
 plotme=str2num(arg_list{2});
 column=str2num(arg_list{3});
 save_best=str2num(arg_list{4});
+higher_better=str2num(arg_list{5});
 
 fid = fopen ("rules.out");
 line = fgetl (fid); %ignore first line
@@ -18,8 +19,8 @@ while line != -1
   try
     key = substr(line, 1, rindex(line, '_'));
     if( !strcmp(key, lastkey))
-      X=load_dirs(key, file_to_load, column, save_best);
-      Xsub = X(:, 1:end - floor(size(X,2)/10));
+      X=load_dirs(key, file_to_load, column, save_best, higher_better);
+      Xsub = X(:, (end - floor(size(X,2)/10)):end);
       S=statistics(X);
       [uu,vv]= max(S(3,:));
       yy = median(S(3,:));
@@ -53,30 +54,48 @@ printf('results.best_param saved.\n');
 
 
 printf('##########################################################\n');
+printf('######## EPISODE NEEDED BY MEDIAN TO REACH BEST ##########\n');
 printf('##########################################################\n');
+printf('be sure the maximum is reached\n');
+printf('no save best : ?? \n');
+printf('save best : reach max performance quicker (may be unstable) \n');
 printf('##########################################################\n');
 
-if length(find(result(:,2) == 1)) > 0 
-	result(find(result(:,2) != 1),:)=[];
+if higher_better
+	best_val = max(result(:,2));
+	mult=1;
+else
+	best_val = min(result(:,2));
+	mult=-1;
+endif
+
+subresult = result;
+if length(find(result(:,2) == best_val)) > 0
+	subresult(find(subresult(:,2) != best_val),:)=[];
 endif
 
 format short
 output_max_field_width(180)
 %fixed_point_format(1)
 
-sortrows(result, [3,  -4])
+sortrows(subresult, [3,  -4]*mult)
 
 printf('##########################################################\n');
+printf('############### MEAN OF LOWER MEDIAN #####################\n');
 printf('##########################################################\n');
-printf('##########################################################\n');
-
-sortrows(result, [-5, 3])
-
-printf('##########################################################\n');
-printf('##########################################################\n');
+printf('if first measure not valid | more convergent/stability measure \n');
 printf('##########################################################\n');
 
-sortrows(result, -6)
+sortrows(result, [-5, 3]*mult)
+
+printf('##########################################################\n');
+printf('######## MEAN OF PERF OF LAST 10 PERCENT EPISODE  ########\n');
+printf('##########################################################\n');
+printf('no save best : convergent measure\n');
+printf('save best : max performance measure (poor discriminative) \n');
+printf('##########################################################\n');
+
+sortrows(result, -6*mult)
 
 if plotme
 	input("press a key");

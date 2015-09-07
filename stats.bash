@@ -41,6 +41,12 @@ function ask_dimension(){
 	read_input_until arg[@]
 }
 
+function ask_higher_better(){
+	echoerr "Is higher value better on this dimension ? (0/1)"
+	arg=(0 1)
+	read_input_until arg[@]
+}
+
 echo "Want do you want to do? single parameter (s) / multiple parameters (m) [s]"
 arg=("s" "m")
 multiple=`read_input_until arg[@]`
@@ -54,7 +60,9 @@ if [[ $multiple == "m" ]] ; then
 	
 	save_best=`ask_save_best`
 
-	COMMAND="best_param.m $STAT_FILE $plot $dimension $save_best"
+	higher_better=`ask_higher_better`
+
+	COMMAND="best_param.m $STAT_FILE $plot $dimension $save_best $higher_better"
 	#COMMAND="stats.m $STAT_FILE"
 else
 	echo "Want do you want to do? only one dimension (s) / plot all dimension (a) : [s]"
