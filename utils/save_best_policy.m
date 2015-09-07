@@ -7,7 +7,7 @@ function final = save_best_policy(X, higher_better=1)
 	    if higher_better
 	            final(ind,ep) = max(X(ind,1:ep));
 	    else
-	            final(ind,ep) = max(X(ind,1:ep));
+	            final(ind,ep) = min(X(ind,1:ep));
 	    endif
         endfor
     endfor

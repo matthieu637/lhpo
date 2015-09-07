@@ -87,7 +87,12 @@ elif [[ $multiple == "s" ]] ; then
 elif [[ $multiple == "o" ]] ; then
 	dimension=`ask_dimension`
 	save_best=`ask_save_best`
-	higher_better=`ask_higher_better`
+	if [ $save_best -eq 1 ] ; then
+		higher_better=`ask_higher_better`
+	else
+		higher_better=1
+	fi
+
 	plot=1
 	echo "Give id number ?"
 	read -s id
