@@ -13,6 +13,6 @@ set(surfaceVar, 'facecolor', colori);
 %set(surfaceVar, 'linestyle', 'none');
 %
 
-plot(statistics(Z)(3,:), mcolor, 'linewidth', 1);
+plot(statistics(Z)(3,:), mcolor, 'linewidth', 3);
 
 endfunction

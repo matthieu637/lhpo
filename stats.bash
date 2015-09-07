@@ -47,8 +47,12 @@ function ask_higher_better(){
 	read_input_until arg[@]
 }
 
-echo "Want do you want to do? single parameter (s) / multiple parameters (m) [s]"
-arg=("s" "m")
+echo "Want do you want to do ?"
+echo " -- single parameter - mean over all (s) [default]" 
+echo " -- multiple parameters - mean over one (m)"
+echo " -- plot one parameter from id (o)"
+
+arg=("s" "m" "o")
 multiple=`read_input_until arg[@]`
 
 if [[ $multiple == "m" ]] ; then
@@ -64,7 +68,7 @@ if [[ $multiple == "m" ]] ; then
 
 	COMMAND="best_param.m $STAT_FILE $plot $dimension $save_best $higher_better"
 	#COMMAND="stats.m $STAT_FILE"
-else
+elif [[ $multiple == "s" ]] ; then
 	echo "Want do you want to do? only one dimension (s) / plot all dimension (a) : [s]"
 	arg=("s" "a")
 	multiple=`read_input_until arg[@]`
@@ -80,6 +84,14 @@ else
 
 		COMMAND="one_by_one.m $STAT_FILE $save_best"
 	fi
+elif [[ $multiple == "o" ]] ; then
+	dimension=`ask_dimension`
+	save_best=`ask_save_best`
+	higher_better=`ask_higher_better`
+	plot=1
+	echo "Give id number ?"
+	read -s id
+	COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id"
 fi
 
 directories=`cat rules.out`
