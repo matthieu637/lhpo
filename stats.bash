@@ -47,12 +47,20 @@ function ask_higher_better(){
 	read_input_until arg[@]
 }
 
+function handler(){
+	exit 0
+}
+
+repeat=1
+trap handler SIGINT
+
 echo "Want do you want to do ?"
 echo " -- single parameter - mean over all (s) [default]" 
 echo " -- multiple parameters - mean over one (m)"
 echo " -- plot one parameter from id (o)"
+echo " -- analyse implication of one parameter (a)"
 
-arg=("s" "m" "o")
+arg=("s" "m" "o" "a")
 multiple=`read_input_until arg[@]`
 
 if [[ $multiple == "m" ]] ; then
@@ -97,15 +105,53 @@ elif [[ $multiple == "o" ]] ; then
 	echo "Give id number ?"
 	read -s id
 	COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id"
+	repeat=2
+elif [[ $multiple == "a" ]] ; then
+	dimension=`ask_dimension`
+	save_best=`ask_save_best`
+	if [ $save_best -eq 1 ] ; then
+		higher_better=`ask_higher_better`
+	else
+		higher_better=1
+	fi
+
+	echo "Give parameter name ?"
+	read name
+	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better $name"
+	repeat=2
 fi
 
-directories=`cat rules.out`
-for dir in $directories ; do
-	echo "############################ $dir #####################################"
 
-	cd $dir
-	echo "OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND"
-	OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND
-	cd ..
+while [ $repeat -ge 1 ] ; do
+	
+	directories=`cat rules.out`
+	for dir in $directories ; do
+		
+		if [[ $multiple == "a" ]] ; then
+			val=`xml sel -t -m "/xml/fold[@name='$dir']/param[@name='$name']" -v @values -n rules.xml`
+			mm=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
+			rank=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
+			COMMAND="$COMMAND_BASE $val $mm $rank"
+		fi
+
+		echo "############################ $dir #####################################"
+	
+		cd $dir
+		echo "OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND"
+		OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND
+		cd ..
+	done
+	
+	if [[ $repeat -eq 2 && $multiple == "o" ]] ; then
+		echo "Give id number ?"
+		read -s id
+		COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id"
+	elif [[ $repeat -eq 2 && $multiple == "a" ]] ; then
+		echo "Give parameter name ?"
+		read name
+	else 
+		repeat=0
+	fi
+
 done
 

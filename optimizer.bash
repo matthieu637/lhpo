@@ -41,7 +41,9 @@ export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 function thread_run(){
 	dir=$1
 	setup=$2
-	parameters=$3
+	shift
+	shift
+	parameters="$@"
 
 	#configuration
 	cp $CONFIG_FILE $dir/$setup/
