@@ -9,7 +9,7 @@ fi
 
 directories=`cat rules.out`
 for dir in $directories ; do
-	rm -r $dir
+	rm -rf $dir
 done
 
 rm rules.out
