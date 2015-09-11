@@ -51,7 +51,7 @@ function thread_run(){
 	i=1
 	for parameter in $parameters ; do
 		value=`echo $setup | cut -d'_' -f$i `
-		sed -i "s/^\($parameter=\)[0-9.]*$/\1$value/g" $dir/$setup/$CONFIG_FILE
+		sed -i "s/^\($parameter=\)[0-9.truefalse]*$/\1$value/g" $dir/$setup/$CONFIG_FILE
 		i=`expr $i + 1`
 	done
 	

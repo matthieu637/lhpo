@@ -117,7 +117,7 @@ elif [[ $multiple == "a" ]] ; then
 
 	echo "Give parameter name ?"
 	read name
-	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better $name"
+	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better"
 	repeat=2
 fi
 
@@ -131,7 +131,7 @@ while [ $repeat -ge 1 ] ; do
 			val=`xml sel -t -m "/xml/fold[@name='$dir']/param[@name='$name']" -v @values -n rules.xml`
 			mm=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
 			rank=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
-			COMMAND="$COMMAND_BASE $val $mm $rank"
+			COMMAND="$COMMAND_BASE $name $val $mm $rank"
 		fi
 
 		echo "############################ $dir #####################################"
