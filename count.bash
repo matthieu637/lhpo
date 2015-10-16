@@ -8,6 +8,7 @@ empty=0
 finished=0
 
 display_run=0
+display_done=0
 remove_running=0
 
 if [ ! -e rules.xml ] ; then
@@ -21,10 +22,14 @@ do
 		"--display-run")
 			display_run=1
 		;;
+		"--display-done")
+			display_done=1
+		;;
 		"-h"|"--help")
 			echo "usage $0 : <directory with rules.xml> <options>"
 			echo "options :"
 			echo "	--display-run : displaying the path of still running"
+			echo "	--display-done : displaying the path of done runs"
 			echo "	--help : print this message"
 			echo "	--remove-running : remove the running directory"
 			exit 1
@@ -54,6 +59,9 @@ for dir in $directories ; do
                         fi
 		elif [[ -e $dir/$setup && -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
+                        if [ $display_done -eq 1 ] ; then
+                            echo $setup
+                        fi
 		fi
 	done
 done
