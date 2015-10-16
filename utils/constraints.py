@@ -3,6 +3,11 @@
 
 import fileinput
 import sys
+from IPython.core.debugger import Tracer
+
+#called from exec
+def str2bool(v):
+  return v.lower() in ("yes", "true", "1")
 
 #get data from stdin
 dico={}
@@ -25,6 +30,7 @@ for line in sys.stdin.readlines():
 for rule in open(sys.argv[1]).readlines():
 	i=0; #while forced because of dynamic removing
 	while i < len(dico[headers[0]]):
+#		Tracer()()
 		exec(rule)
 		if (not test):
 			for header in headers:

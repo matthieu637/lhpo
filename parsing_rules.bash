@@ -38,23 +38,48 @@ for fold in $folds ; do
 	#constraining
 	nconst=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml | wc -l`
 	constraints=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml`
-	echo -n '' > $fold/mixer
-	for constraint in "$constraints" ; do
-		echo "$constraint" >> $fold/mixer 
-	done
+	constraints_type=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @type -n rules.xml`
 
+	#clear old file
+	echo -n '' > $fold/mixer
 	if [ $nconst -eq 0 ] ; then
 		echo "test=True;" > $fold/mixer
 	else
+		i=0
+		read -a constraints_type <<< "$constraints_type"
+		for constraint in "$constraints" ; do
+			if [[ "${constraints_type[$i]}" == 'python' ]] ; then
+				echo "$constraint" >> $fold/mixer
+#			elif [[ "${constraints_type[$i]}" == 'bool' ]] ; then
+#				echo ""
+			else
+				echo "unkown type constraint : ${constraints_type[$i]}"
+				exit 1
+			fi
+
+			i=`expr $i + 1`
+		done
+	
 		sed -i "s/&lt;/</g" $fold/mixer
 		sed -i "s/&gt;/>/g" $fold/mixer
-		sed -i "s/\([A-Za-z0-9_]\+\)/dico['\1'][i]/g" $fold/mixer
-		sed -i "s/^/test=/" $fold/mixer
-		sed -i "s/$/;/" $fold/mixer
+#		sed -i "s/\([A-Za-z0-9_]\+\)/dico['\1'][i]/g" $fold/mixer
+		
+		sed -i "s/^/(/" $fold/mixer
+		sed -i "s/$/) and /" $fold/mixer
+
+		sed -i '1s/^/test=/' $fold/mixer
+		mv $fold/mixer $fold/mixer.2
+		paste -s $fold/mixer.2 > $fold/mixer
+		sed -i 's/ and $/;/' $fold/mixer
 	fi
+	#to debug:
+#	cp $fold/mixer $fold/debug.constraints
+#	cp $fold/rules.out $fold/debug.prerule
 	
+	#execute constraints
 	tmp=`mktemp`
 	cat $fold/rules.out | $LHPO_PATH/utils/constraints.py $fold/mixer > $tmp
+
 	mv $tmp $fold/mixer
 	mv $fold/mixer $fold/rules.out
         sed -i "s/'//g" $fold/rules.out
