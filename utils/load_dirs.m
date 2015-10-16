@@ -1,8 +1,20 @@
 %f version
 function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
-	valid_dirs = glob(strcat(beforef, '[._0-9]*/', endf));
-
+	pattern = strcat(beforef, '[._0-9a-Z]*/', endf);
+	valid_dirs = glob(pattern);
+	
+% regex * doesn't count as zero
+	if length(valid_dirs) == 0
+		pattern = strcat(beforef, '/', endf);
+		valid_dirs = glob(pattern);
+	endif
 %  	valid_dirs
+	if length(valid_dirs) == 0
+		printf('ERROR path :%s \n', pattern);
+		fflush(stdout);
+		final = [];
+		return
+	endif
 
 if length(pk = pkg('list', 'parallel')) == 0
 	for i=1:length(valid_dirs) 
@@ -24,11 +36,6 @@ else
 	final = X';
 	return
 endif
-
-	if(length(valid_dirs) == 0)
-		printf('ERROR path :%s \n', pattern);
-		exit
-	endif
 
 %  	keyboard
 	base = size(X{1});

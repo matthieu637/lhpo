@@ -20,9 +20,18 @@ while line != -1
     key = substr(line, 1, rindex(line, '_'));
     if( !strcmp(key, lastkey))
       X=load_dirs(key, file_to_load, column, save_best, higher_better);
+      if size(X, 1) == 0
+      	lastkey=key;
+        line = fgetl (fid);
+	continue
+      endif
       Xsub = X(:, (end - floor(size(X,2)/10)):end);
       S=statistics(X);
-      [uu,vv]= max(S(3,:));
+      if higher_better
+	      [uu,vv]= max(S(3,:));
+      else
+      	      [uu,vv]= min(S(3,:));
+      endif
       yy = median(S(3,:));
       ww = mean(S(3,:));
       zz = mean(S(2,:));
@@ -41,8 +50,8 @@ while line != -1
     endif
     lastkey=key;
   catch
-	printf('error');
-	key = substr(line, 1, rindex(line, '_'))
+	printf('error %s\n', line);
+	key = substr(line, 1, rindex(line, '_'));
 	lastkey='';
   end_try_catch
 

@@ -130,6 +130,7 @@ while [ $repeat -ge 1 ] ; do
 		if [[ $multiple == "a" ]] ; then
 			val=`xml sel -t -m "/xml/fold[@name='$dir']/param[@name='$name']" -v @values -n rules.xml`
 			mm=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
+			mm=`expr $mm - 1`
 			rank=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
 			COMMAND="$COMMAND_BASE $name $val $mm $rank"
 		fi
