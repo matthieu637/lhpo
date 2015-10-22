@@ -30,6 +30,8 @@ for val=strsplit(vals, ',')
 		endif
 	endfor
 
+	base=strcat(base, '_');
+
 	%printf('X=load_dirs(%s, %s, %d, %d, %d);\n', base{1,1}, file_to_load, column, save_best, higher_better);
 	X=load_dirs(base{1,1}, file_to_load, column, save_best, higher_better);
 	Xsub = X(:, (end - floor(size(X,2)/10)):end);
