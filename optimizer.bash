@@ -27,6 +27,7 @@ if [ ! -e rules.out ] ; then
 fi
 
 max_cpu=$(nbcpu)
+max_cpu=$(expr $max_cpu - 1)
 if [[ $# -eq 2 && $2 -le $max_cpu && $2 -gt 0 ]] ; then
 	CPU=$2
 else
