@@ -52,7 +52,8 @@ function handler(){
 }
 
 repeat=1
-trap handler SIGINT
+#trap handler SIGINT
+#cause problems when trap on read
 
 echo "Want do you want to do ?"
 echo " -- single parameter - mean over all (s) [default]" 
@@ -86,11 +87,15 @@ elif [[ $multiple == "s" ]] ; then
 
 		save_best=`ask_save_best`
 
-		COMMAND="one_by_one.m $STAT_FILE $dimension $save_best"
+		higher_better=`ask_higher_better`
+
+		COMMAND="one_by_one.m $STAT_FILE $dimension $save_best $higher_better"
 	else
 		save_best=`ask_save_best`
 
-		COMMAND="one_by_one.m $STAT_FILE $save_best"
+		higher_better=`ask_higher_better`
+
+		COMMAND="one_by_one.m $STAT_FILE $save_best $higher_better"
 	fi
 elif [[ $multiple == "o" ]] ; then
 	dimension=`ask_dimension`
