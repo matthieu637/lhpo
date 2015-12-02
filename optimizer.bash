@@ -5,6 +5,14 @@
 
 cdIntoFirstArg $@
 
+function gonna_be_killed(){
+	cd $here
+	cd ..
+	rm -rf $setup
+	echo "I know I must stop $setup"
+	exit 0
+}
+
 function cpFileFromArgs(){
         destination=$1
         args=$2
@@ -60,6 +68,7 @@ function thread_run(){
 	cd $dir/$setup
 	tmp_dir=`mktemp -d`
 	here=`pwd`
+	trap gonna_be_killed USR2
 	cp $CONFIG_FILE $tmp_dir
 	cp $COMMAND $tmp_dir
 	args=$(cpFileFromArgs $tmp_dir "$ARGS")
