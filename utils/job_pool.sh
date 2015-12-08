@@ -36,6 +36,8 @@ job_pool_job_queue=/tmp/job_pool_job_queue_$$
 job_pool_result_log=/tmp/job_pool_result_log_$$
 job_pool_result_queue=/tmp/job_pool_result_queue_$$
 
+job_pool_jobs_pid=/tmp/job_pool_jobs_pid_$$
+
 # toggle command echoing
 job_pool_echo_command=0
 
@@ -61,7 +63,7 @@ function _job_pool_echo()
 # \brief cleans up
 function _job_pool_cleanup()
 {
-    rm -f ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue}
+    rm -f ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue} ${job_pool_jobs_pid}
 }
 
 # \brief signal handler
@@ -148,6 +150,7 @@ function _job_pool_start_workers()
     local result_log=$3
     for ((i=0; i<${job_pool_pool_size}; i++)); do
 	_job_pool_worker ${i} ${job_queue} ${result_queue} ${result_log} &
+	echo $! >> ${job_pool_jobs_pid}
     done
 }
 
@@ -171,10 +174,11 @@ function job_pool_init()
     job_pool_echo_command=${echo_command:=0}
 
     # create the fifo job queue and create the exit code log
-    rm -rf ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue}
+    rm -rf ${job_pool_job_queue} ${job_pool_result_log} ${job_pool_result_queue} ${job_pool_jobs_pid}
     mkfifo ${job_pool_job_queue}
     mkfifo ${job_pool_result_queue}
     touch ${job_pool_result_log}
+    touch ${job_pool_jobs_pid}
 
     # fork off the workers
     _job_pool_start_workers ${job_pool_job_queue} ${job_pool_result_queue} ${job_pool_result_log}
@@ -223,3 +227,8 @@ function wait_free_ressources(){
 
 #   echo "stop waiting"
 }
+
+function get_childs_pid(){
+	cat ${job_pool_jobs_pid}
+}
+

@@ -5,6 +5,13 @@
 
 cdIntoFirstArg $@
 
+function gonna_be_killed_parrent(){
+	echo "send stop signals to sons jobs"
+	get_childs_pid
+	get_childs_pid | xargs -I % kill -s USR2 %
+	killall $(basename $COMMAND)
+}
+
 function gonna_be_killed(){
 	cd $here
 	cd ..
@@ -87,6 +94,7 @@ function thread_run(){
 
 if [ $CPU -ne 1 ]; then
 	job_pool_init $CPU 0
+	trap gonna_be_killed_parrent USR2
 fi
 
 #full passage of %100
