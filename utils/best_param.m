@@ -13,7 +13,7 @@ line = fgetl (fid); %ignore first line
 line = fgetl (fid);
 lastkey='';
 i=1;
-printf('\t \t \t \t -> max median \t (ind) max median \t median median \t mean median \t mean low quartile \t mean over 10 last percent \n');
+printf('\t \t \t \t -> max low quartile \t (ind) max low quartile \t median median \t mean median \t mean low quartile \t mean over 10 last percent \n');
 clear result;
 while line != -1
   try
@@ -28,9 +28,11 @@ while line != -1
       Xsub = X(:, (end - floor(size(X,2)/10)):end);
       S=statistics(X);
       if higher_better
+%	      [uu,vv]= max(S(2,:));
 	      [uu,vv]= max(S(3,:));
       else
-      	      [uu,vv]= min(S(3,:));
+%     	      [uu,vv]= min(S(4,:));
+     	      [uu,vv]= min(S(3,:));
       endif
       yy = median(S(3,:));
       ww = mean(S(3,:));

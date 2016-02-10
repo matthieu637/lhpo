@@ -24,7 +24,13 @@ while line != -1
 	      X=load_dirs(key, file_to_load, column, save_best, higher_better);
 	      Xsub = X(:, (end - floor(size(X,2)/10)):end);
 	      S=statistics(X);
-	      [uu,vv]= max(S(3,:));
+              if higher_better
+%             [uu,vv]= max(S(3,:));
+                  [uu,vv]= max(S(2,:));
+              else
+%             [uu,vv]= max(S(3,:));
+                  [uu,vv]= min(S(4,:));
+              endif
 	      yy = median(S(3,:));
 	      ww = mean(S(3,:));
 	      zz = mean(S(2,:));
@@ -36,6 +42,7 @@ while line != -1
 	        figure
 	        s=plotMedianQ(X, 'r');
 	        title(key);
+		ylim([250 500])
 	      endif
       	      break
 	endif

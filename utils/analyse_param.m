@@ -26,27 +26,53 @@ for val=strsplit(vals, ',')
 		if i == rank
 			base=strcat(base, '_', val);	
 		else
-			base=strcat(base, '_', base_regx);	
+%			if i == 3
+%				base=strcat(base, '_', 'false');
+%			elseif i == 4
+%				base=strcat(base, '_', 'true');
+%			elseif i == 5
+%				base=strcat(base, '_', 'true');
+%			elseif i == 6
+%				base=strcat(base, '_', 'false');
+%			elseif i == 7
+%				base=strcat(base, '_', 'true');
+%			elseif i == 8
+%				base=strcat(base, '_', 'true');
+%			elseif i == 9
+%				base=strcat(base, '_', 'false');
+%			elseif i == 10
+%				base=strcat(base, '_', 'true');
+%			else
+				base=strcat(base, '_', base_regx);	
+%			endif
 		endif
 	endfor
 
 	base=strcat(base, '_');
 
-	%printf('X=load_dirs(%s, %s, %d, %d, %d);\n', base{1,1}, file_to_load, column, save_best, higher_better);
-	X=load_dirs(base{1,1}, file_to_load, column, save_best, higher_better);
-	Xsub = X(:, (end - floor(size(X,2)/10)):end);
-	S=statistics(X);
-	[uu,vv]= max(S(3,:));
-	yy = median(S(3,:));
-      	ww = mean(S(3,:));
-	zz = mean(S(2,:));
-	rr = mean(mean(Xsub));
-	printf('(%s : %s) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \n', key, val{1,1}, uu, vv, yy, ww, zz, rr);
-	fflush(stdout);
-
-        figure
-        s=plotMedianQ(X, 'r');
-        title(strcat(key, ' : ', val));
+	printf('X=load_dirs(%s, %s, %d, %d, %d);\n', base{1,1}, file_to_load, column, save_best, higher_better);
+	try
+		X=load_dirs(base{1,1}, file_to_load, column, save_best, higher_better);
+		Xsub = X(:, (end - floor(size(X,2)/10)):end);
+		S=statistics(X);
+		if higher_better
+	              [uu,vv]= max(S(2,:));
+		else
+	              [uu,vv]= min(S(4,:));
+		endif
+		yy = median(S(3,:));
+	      	ww = mean(S(3,:));
+		zz = mean(S(2,:));
+		rr = mean(mean(Xsub));
+		printf('(%s : %s) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \n', key, val{1,1}, uu, vv, yy, ww, zz, rr);
+		fflush(stdout);
+	
+	        figure
+	        s=plotMedianQ(X, 'r');
+	        title(strcat(key, ' : ', val));
+	catch
+		continue
+	end_try_catch
 endfor
 
 input("press a key");
