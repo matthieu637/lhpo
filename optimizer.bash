@@ -51,6 +51,7 @@ fi
 echo "Number of thread set to $CPU."
 
 export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
+export DATA=$(xml sel -t -m "/xml/data" -v @value rules.xml)
 export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
 export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 
@@ -78,6 +79,9 @@ function thread_run(){
 	trap gonna_be_killed USR2
 	cp $CONFIG_FILE $tmp_dir
 	cp $COMMAND $tmp_dir
+	if [[ ! $DATA == "" ]] ; then
+		cp $DATA $tmp_dir
+	fi
 	args=$(cpFileFromArgs $tmp_dir "$ARGS")
 	cd $tmp_dir/
 	executable="./$(basename $COMMAND)"
