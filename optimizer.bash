@@ -48,6 +48,12 @@ if [[ $# -eq 2 && $2 -le $max_cpu && $2 -gt 0 ]] ; then
 else
 	CPU=$max_cpu
 fi
+
+export MAX_CPU=$(xml sel -t -m "/xml/max_cpu" -v @value rules.xml)
+if [[ ! $MAX_CPU == "" ]] ; then
+	CPU=$MAX_CPU
+fi
+
 echo "Number of thread set to $CPU."
 
 export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
