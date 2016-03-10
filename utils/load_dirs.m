@@ -11,16 +11,17 @@ function final = load_dirs (beforef,endf, column, save_best, higher_better=1, de
 		printf('looking for : %s\n', pattern);
 	endif
 	valid_dirs = glob(pattern);
-	if(debug==1)
-		valid_dirs
-	endif
-	
+
 % regex * doesn't count as zero
 	if length(valid_dirs) == 0
 		pattern = strcat(beforef, '/', endf);
 		valid_dirs = glob(pattern);
 	endif
-%  	valid_dirs
+
+	if(debug==1)
+		valid_dirs
+	endif
+
 	if length(valid_dirs) == 0
 		printf('ERROR path :%s \n', pattern);
 		fflush(stdout);
@@ -52,6 +53,7 @@ function final = load_dirs (beforef,endf, column, save_best, higher_better=1, de
 				final = X';
 				return
 			catch
+				lasterror()
 				printf('ERROR MERGE MATRIX ! try to analyse the following :\n');
 				firstTry=0;
 			end_try_catch
