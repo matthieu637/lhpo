@@ -1,5 +1,11 @@
 %f version
 function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
+	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
+		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
+		printf("X=load_dirs ('.', 'learning.data', 6, 1, 0);\n");
+		final = [];
+		return
+	endif
 	pattern = strcat(beforef, '[._0-9a-Z]*/', endf);
 	valid_dirs = glob(pattern);
 	
