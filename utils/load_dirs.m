@@ -1,5 +1,5 @@
 %f version
-function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
+function final = load_dirs (beforef,endf, column, save_best, higher_better=1, debug=0)
 	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
 		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
 		printf("X=load_dirs ('.', 'learning.data', 6, 1, 0);\n");
@@ -7,7 +7,13 @@ function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
 		return
 	endif
 	pattern = strcat(beforef, '[._0-9a-Z]*/', endf);
+	if(debug==1)
+		printf('looking for : %s\n', pattern);
+	endif
 	valid_dirs = glob(pattern);
+	if(debug==1)
+		valid_dirs
+	endif
 	
 % regex * doesn't count as zero
 	if length(valid_dirs) == 0
@@ -24,7 +30,7 @@ function final = load_dirs (beforef,endf, column, save_best, higher_better=1)
 
 	firstTry=1;
 	while 1	
-		if (length(pk = pkg('list', 'parallel')) == 0) || (firstTry != 1)
+		if (length(pk = pkg('list', 'parallel')) == 0) || (firstTry != 1) || length(valid_dirs)==1
 			for i=1:length(valid_dirs) 
 				valid_dir = valid_dirs{i,1};
 				X{i} = load(valid_dir)(:,column);
