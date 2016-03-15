@@ -87,6 +87,14 @@ function thread_run(){
 	cp $COMMAND $tmp_dir
 	if [[ ! $DATA == "" ]] ; then
 		cp $DATA $tmp_dir
+		cd $tmp_dir
+		for data_file in $DATA ; do
+			if [[ `file $data_file -b | cut -d ' ' -f1` == 'XZ' ]] ; then
+				tar -xJf $(basename $data_file)
+				rm $(basename $data_file)
+			fi
+		done
+		cd $here
 	fi
 	args=$(cpFileFromArgs $tmp_dir "$ARGS")
 	cd $tmp_dir/
