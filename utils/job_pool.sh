@@ -217,7 +217,7 @@ function wait_free_ressources(){
    reach=`expr $JOBPOOL_CPU + $nbdone`
 
 #   echo "$nbdone $reach $JOBPOOL_TODO"
-   while [ $reach -lt $JOBPOOL_TODO ] ; do
+   while [ $reach -le $JOBPOOL_TODO ] ; do
 #   	   echo "waiting"
 	   read line < ${job_pool_result_queue}
    	   nbdone=`cat ${job_pool_result_log} | wc -l`
@@ -225,7 +225,7 @@ function wait_free_ressources(){
    	   #echo "$nbdone $reach $JOBPOOL_TODO"
    done
 
-#   echo "stop waiting"
+   #echo "stop waiting"
 }
 
 function get_childs_pid(){
