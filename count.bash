@@ -10,6 +10,7 @@ finished=0
 display_run=0
 display_done=0
 remove_running=0
+remove_dead_node=0
 
 if [ ! -e rules.xml ] ; then
 	echo "rules.xml doesn't exists in $1"
@@ -25,6 +26,9 @@ do
 		"--display-done")
 			display_done=1
 		;;
+		"--remove-dead-node")
+			remove_dead_node=1
+		;;
 		"-h"|"--help")
 			echo "usage $0 : <directory with rules.xml> <options>"
 			echo "options :"
@@ -32,6 +36,7 @@ do
 			echo "	--display-done : displaying the path of done runs"
 			echo "	--help : print this message"
 			echo "	--remove-running : remove the running directory"
+			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
 			exit 1
 		;;
 		"--remove-running")
@@ -57,6 +62,17 @@ for dir in $directories ; do
                         if [ $display_run -eq 1 ] ; then
                             echo $setup
                         fi
+			if [ $remove_dead_node -eq 1 ] ; then 
+				if [ -e $dir/$setup/host ] ; then
+					timeout 5 ssh -o StrictHostKeyChecking=no -o HashKnownHosts=no -o BatchMode=yes -n -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
+					if [[ !  $? -eq 0 ]] ; then
+						echo "$(cat $dir/$setup/host) down, rm $dir/$setup"
+						rm -r $dir/$setup
+					fi
+				else
+					echo "$dir/$setup/host doesn't exists"
+				fi
+			fi
 		elif [[ -e $dir/$setup && -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
                         if [ $display_done -eq 1 ] ; then
