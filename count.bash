@@ -60,7 +60,7 @@ for dir in $directories ; do
 				rm -rf $dir/$setup
 			fi
                         if [ $display_run -eq 1 ] ; then
-                            echo $setup
+                            echo "$setup : $(cat $dir/$setup/host)"
                         fi
 			if [ $remove_dead_node -eq 1 ] ; then 
 				if [ -e $dir/$setup/host ] ; then
