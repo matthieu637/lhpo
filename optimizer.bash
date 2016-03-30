@@ -58,6 +58,7 @@ echo "Number of thread set to $CPU."
 
 export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
 export DATA=$(xml sel -t -m "/xml/data" -v @value rules.xml)
+export RM_DATA=$(xml sel -t -m "/xml/rm_data" -v @value rules.xml)
 export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
 export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 
@@ -103,6 +104,10 @@ function thread_run(){
 	echo "$executable $args >& full.trace"
 	$executable $args >& full.trace
 	rm $executable
+
+	if [[ ! $RM_DATA == "" ]] ; then
+		rm -rf $RM_DATA
+	fi
 
 	cd $here
 	mv $tmp_dir/* .
