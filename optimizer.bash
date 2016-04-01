@@ -103,6 +103,7 @@ function thread_run(){
 	chmod +x $executable
 	echo "$executable $args >& full.trace"
 	$executable $args >& full.trace
+	echo $? >> full.trace
 	rm $executable
 
 	if [[ ! $RM_DATA == "" ]] ; then
