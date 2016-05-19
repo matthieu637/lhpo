@@ -25,6 +25,30 @@
 	-->
 	<default_stat_file value="learning.data" />
 
+	<!--
+		The maximum number of cpu in the pool
+	-->
+	<max_cpu value='3' />
+
+	<!--
+		The data to be copied into the experiment directory
+		It can also be an archive that will be uncompressed automatically
+	-->
+	<data value='/home/.../acrobot.tar.xz' />
+
+	<!--
+		The produced data that will be removed after the experiment finished
+		Use this option to reduce the final size of the whole experiment
+		This can use the * option for multiple files
+	-->
+	<rm_data value='polset.* more' />
+
+	<!--
+		The procuced data that will be compressed (into gzip to keep compatibility with gnu octave,vim,...)
+		Use this option to reduce the final size of the whole experiment
+		Space separator can be used
+	-->
+	<compressed_data value='*.data full.trace' />
 
         <fold name="randomness">
                 <param name="starting_epsilon" values="0.05,0.1,0.15,0.2,0.25" />

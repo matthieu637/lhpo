@@ -61,6 +61,7 @@ export DATA=$(xml sel -t -m "/xml/data" -v @value rules.xml)
 export RM_DATA=$(xml sel -t -m "/xml/rm_data" -v @value rules.xml)
 export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
 export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
+export COMPRESSED_DATA=$(xml sel -t -m "/xml/compressed_data" -v @value rules.xml)
 
 function thread_run(){
 	dir=$1
@@ -108,6 +109,13 @@ function thread_run(){
 
 	if [[ ! $RM_DATA == "" ]] ; then
 		rm -rf $RM_DATA
+	fi
+
+	if [[ ! $COMPRESSED_DATA == "" ]] ; then
+	 	for cfile in $COMPRESSED_DATA ; do
+			gzip --best $cfile
+			mv $cfile.gz $cfile
+		done
 	fi
 
 	cd $here

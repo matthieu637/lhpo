@@ -2,7 +2,8 @@
 function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
 	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
 		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
-		printf("X=load_dirs ('.', 'learning.data', 6, 1, 0);\n");
+		printf("X=load_dirs ('.', '[0-9.]*learning.data', 6, 1, 0);\n");
+		printf("X=load_dirs ('.', '[0-9.]*testing.data', 6, 1, 0);\n");
 		final = [];
 		return
 	endif
