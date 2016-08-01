@@ -53,7 +53,7 @@ for dir in $directories ; do
 	for setup in $setups ; do
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
-		elif [[ -e $dir/$setup && ! -e $dir/$setup/$END_FILE ]] ; then
+		elif [[ ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ]] ; then
 			running=`expr $running + 1`
 #			cat $dir/$setup/host
 			if [ $remove_running -eq 1 ] ; then
@@ -73,7 +73,7 @@ for dir in $directories ; do
 					echo "$dir/$setup/host doesn't exists"
 				fi
 			fi
-		elif [[ -e $dir/$setup && -e $dir/$setup/$END_FILE ]] ; then
+		elif [[ -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
                         if [ $display_done -eq 1 ] ; then
                             echo $setup
