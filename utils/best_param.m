@@ -7,13 +7,15 @@ column=str2num(arg_list{3});
 save_best=str2num(arg_list{4});
 higher_better=str2num(arg_list{5});
 
+split_long_rows(0);
+
 fid = fopen ("rules.out");
 line = fgetl (fid); %ignore first line
 
 line = fgetl (fid);
 lastkey='';
 i=1;
-printf('\t \t \t \t -> max low quartile \t (ind) max low quartile \t median median \t mean median \t mean low quartile \t mean over 10 last percent \n');
+printf('\t \t \t \t -> max low quartile \t (ind) max low quartile \t median median \t mean median \t mean low quartile \t mean over 10 last percent \t mean progression \n');
 clear result;
 while line != -1
   try
@@ -26,7 +28,15 @@ while line != -1
 	continue
       endif
       Xsub = X(:, (end - floor(size(X,2)/10)):end);
+      Xsub2 = X(:, 1:5);
+
       S=statistics(X);
+      %S(1) min
+      %S(2) first quartile
+      %3 median
+      %4 third quartile
+      %5 max
+      %6 mean
       if higher_better
 %	      [uu,vv]= max(S(2,:));
 	      [uu,vv]= max(S(3,:));
@@ -38,9 +48,10 @@ while line != -1
       ww = mean(S(3,:));
       zz = mean(S(2,:));
       rr = mean(mean(Xsub));
-      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr);
+      ss = mean(mean(Xsub)) - mean(mean(Xsub2));
+      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr, ss);
       fflush(stdout);
-      result(end+1,:)=[i uu vv ww zz rr];
+      result(end+1,:)=[i uu vv ww zz rr ss];
       i = i +1;
       
       if plotme==1
@@ -87,6 +98,7 @@ endif
 
 format short
 output_max_field_width(180)
+split_long_rows(0)
 %fixed_point_format(1)
 
 sortrows(subresult, [3,  -4]*mult)
@@ -107,6 +119,15 @@ printf('save best : max performance measure (poor discriminative) \n');
 printf('##########################################################\n');
 
 sortrows(result, -6*mult)
+
+printf('##########################################################\n');
+printf('## MEAN OF PERF OF LAST 10 PER. EP. - 10 PER. FIRST EP. ##\n');
+printf('##########################################################\n');
+printf('progression measure\n');
+printf('should by use as multicriteria because first ep could be lucky \n');
+printf('##########################################################\n');
+
+sortrows(result, -7*mult)
 
 if plotme
 	input("press a key");
