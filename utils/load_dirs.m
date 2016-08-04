@@ -33,6 +33,16 @@ function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
 		return
 	endif
 
+	%memory limits -
+	Y=load(valid_dirs{1,1})(:,column);
+	if( (length(valid_dirs)*size(Y,1)) > 10^8)
+		printf('WARNING matrix is too big > 10^8, I am going to shuffle it and take only a subpart\n');
+		valid_dirs=valid_dirs(randperm(length(valid_dirs)));
+		nsize=10^8/size(Y,1);
+		valid_dirs = valid_dirs (1:nsize);
+		clear Y;
+	endif
+
 	firstTry=1;
 	while 1	
 		if (length(pk = pkg('list', 'parallel')) == 0) || (firstTry != 1) || length(valid_dirs)==1
