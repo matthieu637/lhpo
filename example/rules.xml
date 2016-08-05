@@ -65,4 +65,9 @@
 		<!-- if not determinist, set replay to 2 -->
 		<rule constraint="dico['replay'][i]=='2' if dico['determinist'][i]=='false' else True" type="python" />
         </fold>
+        <fold name="more-constraints">
+		<param name='nb_fitted_updates' values='1,10,30' />
+		<param name='nb_internal_critic_updates' values='1,10,30,300' />
+		<rule constraint="int(dico['nb_internal_critic_updates'][i]) &lt; 300 if int(dico['nb_fitted_updates'][i]) &gt; 1 else True" type="python" />
+        </fold>
 </xml>
