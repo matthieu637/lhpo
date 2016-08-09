@@ -11,6 +11,7 @@ display_run=0
 display_done=0
 remove_running=0
 remove_dead_node=0
+reduce_weight=0
 
 if [ ! -e rules.xml ] ; then
 	echo "rules.xml doesn't exists in $1"
@@ -37,10 +38,14 @@ do
 			echo "	--help : print this message"
 			echo "	--remove-running : remove the running directory"
 			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
+			echo "	--reduce-weight : remove done data (copy them before!) and tricks to not compute them again"
 			exit 1
 		;;
 		"--remove-running")
 			remove_running=1
+		;;
+		"--reduce-weight")
+			reduce_weight=1
 		;;
 	esac
 done
@@ -50,6 +55,10 @@ END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
 directories=`cat rules.out`
 for dir in $directories ; do
 	setups=`cat $dir/rules.out | sed -e '1d'`
+	if [ $reduce_weight -eq 1 ] ; then
+		echo "size before : $(du -BG -s $dir)"
+	fi
+
 	for setup in $setups ; do
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
@@ -78,8 +87,16 @@ for dir in $directories ; do
                         if [ $display_done -eq 1 ] ; then
                             echo $setup
                         fi
+
+			if [ $reduce_weight -eq 1 ] ; then
+			    find $dir/$setup/ -type f -not -name "$END_FILE" -print0 | xargs -I % -0 rm %
+			fi
 		fi
 	done
+
+	if [ $reduce_weight -eq 1 ] ; then
+		echo "size after : $(du -BG -s $dir)"
+	fi
 done
 
 echo "running : ${running}"
