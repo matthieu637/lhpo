@@ -90,6 +90,7 @@ for fold in $folds ; do
 	sed -i '1'"s/[,]//g" $fold/rules.out
 	sed -i "s/_$//g" $fold/rules.out
 
+	echo "$(wc -l $fold/rules.out) runs to do"
 done
 
 echo "$folds" | sed -e 's/ //g' > rules.out
