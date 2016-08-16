@@ -14,7 +14,7 @@ line = fgetl (fid); %ignore first line
 line = fgetl (fid);
 lastkey='';
 i=1;
-printf('\t \t \t \t -> max median \t (ind) max median \t median median \t mean median \t mean low quartile \t mean over 10 last percent \n');
+printf('\t \t \t \t -> max median \t (ind) max median \t median median \t mean median \t mean low quartile \t mean over 10 last percent \t nb sample \n');
 clear result;
 while line != -1
   try
@@ -35,7 +35,7 @@ while line != -1
 	      ww = mean(S(3,:));
 	      zz = mean(S(2,:));
 	      rr = mean(mean(Xsub));
-	      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr);
+	      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr, size(X,1) );
 	      fflush(stdout);
       
 	      if plotme==1

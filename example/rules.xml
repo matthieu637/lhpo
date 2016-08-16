@@ -66,8 +66,13 @@
 		<rule constraint="dico['replay'][i]=='2' if dico['determinist'][i]=='false' else True" type="python" />
         </fold>
         <fold name="more-constraints">
+		<param name='nb_actor_updates' values='1,10,30' />
+		<param name='nb_critic_updates' values='1,10,30' />
 		<param name='nb_fitted_updates' values='1,10,30' />
 		<param name='nb_internal_critic_updates' values='1,10,30,300' />
-		<rule constraint="int(dico['nb_internal_critic_updates'][i]) &lt; 300 if int(dico['nb_fitted_updates'][i]) &gt; 1 else True" type="python" />
+
+		<rule constraint="int(dico['nb_internal_critic_updates'][i]) &lt; 30 if int(dico['nb_fitted_updates'][i]) &gt; 1 else True" type="python" />
+		<rule constraint="int(dico['nb_internal_critic_updates'][i]) &gt; 10 if dico['reset_qnn'][i]=='true' else True" type="python" />
+		<rule constraint="int(dico['nb_actor_updates'][i]) + int(dico['nb_critic_updates'][i]) + int(dico['nb_fitted_updates'][i]) &gt; 3" type="python" />
         </fold>
 </xml>
