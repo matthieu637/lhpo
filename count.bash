@@ -9,6 +9,7 @@ finished=0
 
 display_run=0
 display_done=0
+display_bug=0
 remove_running=0
 remove_dead_node=0
 reduce_weight=0
@@ -21,6 +22,9 @@ fi
 for arg in "$@"
 do
 	case $arg in
+		"--display-bug")
+			display_bug=1
+		;;
 		"--display-run")
 			display_run=1
 		;;
@@ -34,6 +38,7 @@ do
 			echo "usage $0 : <directory with rules.xml> <options>"
 			echo "options :"
 			echo "	--display-run : displaying the path of still running"
+			echo "	--display-bug : displaying the path of still running but seems bugged"
 			echo "	--display-done : displaying the path of done runs"
 			echo "	--help : print this message"
 			echo "	--remove-running : remove the running directory"
@@ -70,6 +75,12 @@ for dir in $directories ; do
 			fi
                         if [ $display_run -eq 1 ] ; then
                             echo "$setup : $(cat $dir/$setup/host)"
+                        fi
+                        if [ $display_bug -eq 1 ] ; then
+				if [[ -e $dir/$setup/host && $(ls -l $dir/$setup/ | wc -l) -gt 3 ]] ; then
+                        		echo "$setup : $(cat $dir/$setup/host)"
+					#rm -rf $dir/$setup
+				fi
                         fi
 			if [ $remove_dead_node -eq 1 ] ; then 
 				if [ -e $dir/$setup/host ] ; then
