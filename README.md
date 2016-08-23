@@ -2,6 +2,11 @@
 Lightweight HyperParameter Optimizer
 
 Run experiments with different parameters, to average, ...
+##### Dependencies :
+- python
+- xmlstarlet
+- ipython3
+- octave (optional for statistics/graphs)
 
 ##### Example :
 Create a rules.xml file in a dir and run
