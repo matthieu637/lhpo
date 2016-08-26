@@ -104,7 +104,17 @@ function thread_run(){
 	chmod +x $executable
 	echo "$executable $args >& full.trace"
 	$executable $args >& full.trace
-	echo $? >> full.trace
+	result=$?
+	echo $result >> full.trace
+
+	if [ $result -ne 0 ] ; then
+		echo "FAILED : ($tmp_dir)"
+		cat full.trace
+		rm $here/host
+		rm $here/$CONFIG_FILE
+		rmdir $here
+		exit 0
+	fi
 	rm $executable
 
 	if [[ ! $RM_DATA == "" ]] ; then
