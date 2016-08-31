@@ -30,8 +30,8 @@ function read_input_until {
 }
 
 function ask_save_best(){
-	echoerr "Save best ? (0/1)"
-	arg=(0 1)
+	echoerr "Save best ? (0 : no/1 : yes/2 : moving max)"
+	arg=(0 1 2)
 	read_input_until arg[@]
 }
 
@@ -100,7 +100,7 @@ elif [[ $multiple == "s" ]] ; then
 elif [[ $multiple == "o" ]] ; then
 	dimension=`ask_dimension`
 	save_best=`ask_save_best`
-	if [ $save_best -eq 1 ] ; then
+	if [ $save_best -ge 1 ] ; then
 		higher_better=`ask_higher_better`
 	else
 		higher_better=1
@@ -114,7 +114,7 @@ elif [[ $multiple == "o" ]] ; then
 elif [[ $multiple == "a" ]] ; then
 	dimension=`ask_dimension`
 	save_best=`ask_save_best`
-	if [ $save_best -eq 1 ] ; then
+	if [ $save_best -ge 1 ] ; then
 		higher_better=`ask_higher_better`
 	else
 		higher_better=1
