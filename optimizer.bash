@@ -71,6 +71,11 @@ export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
 export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 export COMPRESSED_DATA=$(xml sel -t -m "/xml/compressed_data" -v @value rules.xml)
 
+if [ ! -e $COMMAND ] ; then
+	echo "$COMMAND doesn't exists"
+	exit 1
+fi
+
 function thread_run(){
 	dir=$1
 	setup=$2
@@ -113,7 +118,7 @@ function thread_run(){
 	echo "$executable $args >& full.trace"
 
 	$executable $args >& full.trace &
-	wait
+	wait $!
 	result=$?
 
 	echo $result >> full.trace
