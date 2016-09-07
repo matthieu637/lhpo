@@ -161,8 +161,8 @@ for dir in $directories ; do
 	parameters=`head -1 $dir/rules.out`
 
 	all_todo=`mktemp`
-	cat $dir/rules.out | sed -e '1d' | shuf > all_todo
-	for setup in $(cat all_todo) ; do
+	cat $dir/rules.out | sed -e '1d' | shuf > $all_todo
+	for setup in $(cat $all_todo) ; do
 		if [ $CPU -ne 1 ] ; then
 			wait_free_ressources
 		fi
