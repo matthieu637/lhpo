@@ -5,11 +5,14 @@
 
 cdIntoFirstArg $@
 
+#parrent is locked on wait_for_ressource
+#sons receive directly the signal
 function gonna_be_killed_parrent(){
-	echo "send stop signals to sons jobs"
-	get_childs_pid
-	get_childs_pid | xargs -I % kill -s USR2 %
-	killall $(basename $COMMAND)
+	echo "all stop received, sleep a little"
+#	get_childs_pid
+#	get_childs_pid | xargs -I % kill -s USR2 %
+	sleep 1m
+	exit 0
 }
 
 function gonna_be_killed(){
@@ -17,6 +20,11 @@ function gonna_be_killed(){
 	cd ..
 	rm -rf $setup
 	echo "I know I must stop $setup"
+	killall $(basename $COMMAND)
+	if [ $CPU -ne 1 ] ; then
+		#unlock father
+		unlock_wait
+	fi
 	exit 0
 }
 
@@ -103,8 +111,11 @@ function thread_run(){
 	executable="./$(basename $COMMAND)"
 	chmod +x $executable
 	echo "$executable $args >& full.trace"
-	$executable $args >& full.trace
+
+	$executable $args >& full.trace &
+	wait
 	result=$?
+
 	echo $result >> full.trace
 
 	if [ $result -ne 0 ] ; then
@@ -144,7 +155,9 @@ directories=`cat rules.out`
 for dir in $directories ; do
 	parameters=`head -1 $dir/rules.out`
 
-	cat $dir/rules.out | sed -e '1d' | shuf | while read setup ; do
+	all_todo=`mktemp`
+	cat $dir/rules.out | sed -e '1d' | shuf > all_todo
+	for setup in $(cat all_todo) ; do
 		if [ $CPU -ne 1 ] ; then
 			wait_free_ressources
 		fi
@@ -158,6 +171,7 @@ for dir in $directories ; do
 			fi
 		fi
 	done
+	rm $all_todo
 done
 
 

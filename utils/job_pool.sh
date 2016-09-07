@@ -131,6 +131,14 @@ done
 exec 7>&-
 }
 
+function unlock_wait(){
+	exec 8<> ${job_pool_result_queue}
+	flock --exclusive 8
+	echo "job_pool: exited" >> ${job_pool_result_queue}
+	flock --unlock 8
+	exec 8>&-
+}
+
 # \brief sends message to worker processes to stop
 function _job_pool_stop_workers()
 {

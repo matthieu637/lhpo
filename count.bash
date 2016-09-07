@@ -84,7 +84,7 @@ for dir in $directories ; do
                         fi
 			if [ $remove_dead_node -eq 1 ] ; then 
 				if [ -e $dir/$setup/host ] ; then
-					timeout 10 ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
+					timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
 					if [[ !  $? -eq 0 ]] ; then
 						echo "$(cat $dir/$setup/host) down, rm $dir/$setup"
 						rm -r $dir/$setup
