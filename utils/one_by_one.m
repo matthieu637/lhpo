@@ -10,6 +10,16 @@ if length(arg_list) == 4
 	[uu,vv]= max(median(X));
 	printf('\t -> %f\t %f \t %f \t %f \t %f\n', uu, vv, median(median(X)), mean(median(X)), mean(statistics(X)(2,:)));
 	fflush(stdout);
+elseif length(arg_list) == 5
+	X=load_dirs('.', strcat('[0-9.]*', arg_list{1}), str2num(arg_list{2}), str2num(arg_list{3}), str2num(arg_list{4}));
+	if(size(X,1) == 1)
+		plot(X, '.');
+	else
+		s=plotMedianQ(X, 'r');
+		[uu,vv]= max(median(X));
+		printf('\t -> %f\t %f \t %f \t %f \t %f\n', uu, vv, median(median(X)), mean(median(X)), mean(statistics(X)(2,:)));
+	endif
+	fflush(stdout);
 else
 	for i=1:10
 		try

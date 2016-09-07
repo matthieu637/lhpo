@@ -1,5 +1,5 @@
 				
-function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
+function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
 	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
 		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
 		printf("X=load_dirs ('.', '[0-9.]*learning.data', 6, 1, 0);\n");
@@ -14,6 +14,8 @@ function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
 	global valid_dirs;
 	global column=colm;
 	global higher_better=hb;
+	global inter_moving=50;
+	global save_best=sb;
 	valid_dirs = glob(pattern);
 
 % regex * doesn't count as zero
@@ -49,8 +51,10 @@ function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
 			for i=1:length(valid_dirs) 
 				valid_dir = valid_dirs{i,1};
 				X{i} = load(valid_dir)(:,column);
-				if save_best
+				if save_best == 1
 					X{i} = save_best_policy(X{i}', higher_better)';
+				elseif save_best == 2
+					X{i} = moving_max_policy(X{i}', higher_better, inter_moving)';
 				endif
 			endfor
 			break
@@ -58,15 +62,9 @@ function final = load_dirs (beforef,endf, colm, save_best, hb=1, debug=0)
 			pkg load parallel
 			vector_x=1:length(valid_dirs);
 			try
-				if save_best
-					%fun = @(x) save_best_policy((load(valid_dirs{x,1})(:,column))', higher_better)';
-					X = pararrayfun(nproc, @parasbpload, vector_x, 'VerboseLevel', 0);
-				else
 				%fun = @(x) load(valid_dirs{x,1})(:,column); %cannot indexing in anonymous
 				%function cannot be called fun
-					X = pararrayfun(nproc, @paraload, vector_x, 'VerboseLevel', 0);
-				endif
-
+				X = pararrayfun(nproc, @paraload, vector_x, 'VerboseLevel', 0);
 				final = X';
 				return
 			catch
