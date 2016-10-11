@@ -3,6 +3,8 @@
 . ./utils/functions.bash
 cdIntoFirstArg $@
 
+project=$(basename $1)
+
 running=0
 empty=0
 finished=0
@@ -13,6 +15,7 @@ display_bug=0
 remove_running=0
 remove_dead_node=0
 reduce_weight=0
+ask_upload=0
 
 if [ ! -e rules.xml ] ; then
 	echo "rules.xml doesn't exists in $1"
@@ -44,6 +47,7 @@ do
 			echo "	--remove-running : remove the running directory"
 			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
 			echo "	--reduce-weight : remove done data (copy them before!) and tricks to not compute them again"
+			echo "	--ask-upload : upload running data even if not finished"
 			exit 1
 		;;
 		"--remove-running")
@@ -52,10 +56,15 @@ do
 		"--reduce-weight")
 			reduce_weight=1
 		;;
+		"--ask-upload")
+			ask_upload=1
+			display_run=1
+		;;
 	esac
 done
 
 END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
+STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
 
 directories=`cat rules.out`
 for dir in $directories ; do
@@ -75,6 +84,10 @@ for dir in $directories ; do
 			fi
                         if [ $display_run -eq 1 ] ; then
                             echo "$setup : $(cat $dir/$setup/host)"
+				if [ $ask_upload -eq 1 ] ; then
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "find /tmp -maxdepth 1 -type d | grep -e 'tmp[.]' | xargs -I % cp %/0.learning.data ~/multi_call/$project/$dir/$setup/"
+					sleep 1s
+				fi
                         fi
                         if [ $display_bug -eq 1 ] ; then
 				if [[ -e $dir/$setup/host && $(ls -l $dir/$setup/ | wc -l) -gt 3 ]] ; then
