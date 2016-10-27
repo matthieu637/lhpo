@@ -85,7 +85,7 @@ for dir in $directories ; do
                         if [ $display_run -eq 1 ] ; then
                             echo "$setup : $(cat $dir/$setup/host)"
 				if [ $ask_upload -eq 1 ] ; then
-				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "find /tmp -maxdepth 1 -type d | grep -e 'tmp[.]' | xargs -I % cp %/0.learning.data ~/multi_call/$project/$dir/$setup/"
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "find /tmp -maxdepth 1 -type d | grep -e 'tmp[.]' | xargs -I % cp %/0.learning.data ~/home_grid5000/$project/$dir/$setup/"
 					sleep 1s
 				fi
                         fi
