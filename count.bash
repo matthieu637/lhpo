@@ -16,6 +16,7 @@ remove_running=0
 remove_dead_node=0
 reduce_weight=0
 ask_upload=0
+kill_running=0
 
 if [ ! -e rules.xml ] ; then
 	echo "rules.xml doesn't exists in $1"
@@ -48,6 +49,7 @@ do
 			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
 			echo "	--reduce-weight : remove done data (copy them before!) and tricks to not compute them again"
 			echo "	--ask-upload : upload running data even if not finished"
+			echo "	--kill-running : upload running data even if not finished"
 			exit 1
 		;;
 		"--remove-running")
@@ -55,6 +57,10 @@ do
 		;;
 		"--reduce-weight")
 			reduce_weight=1
+		;;
+		"--kill-running")
+			kill_running=1
+			display_run=1
 		;;
 		"--ask-upload")
 			ask_upload=1
@@ -87,6 +93,9 @@ for dir in $directories ; do
 				if [ $ask_upload -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "find /tmp -maxdepth 1 -type d | grep -e 'tmp[.]' | xargs -I % cp %/0.learning.data ~/home_grid5000/$project/$dir/$setup/"
 					sleep 1s
+				fi
+				if [ $kill_running -eq 1 ] ; then
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
 				fi
                         fi
                         if [ $display_bug -eq 1 ] ; then
