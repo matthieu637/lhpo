@@ -87,6 +87,17 @@ for dir in $directories ; do
 		# $dir/$setup exists
 		elif [[ $CONTINUE -ne 0 && -e $dir/$setup/running ]] ; then
 			running=`expr $running + 1`
+			if [ $remove_dead_node -eq 1 ] ; then 
+				if [ -e $dir/$setup/host ] ; then
+					timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
+					if [[ !  $? -eq 0 ]] ; then
+						echo "$(cat $dir/$setup/host) down, rm $dir/$setup/running"
+						rm $dir/$setup/running
+					fi
+				else
+					echo "$dir/$setup/host doesn't exists"
+				fi
+			fi
 		elif [[ $CONTINUE -ne 0 && ! -e $dir/$setup/running ]] ; then
 			starting=`expr $starting + 1`
 		elif [[ ( ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ) && $CONTINUE -eq 0 ]] ; then
