@@ -11,14 +11,31 @@ function gonna_be_killed_parrent(){
 	echo "all stop received, sleep a little"
 #	get_childs_pid
 #	get_childs_pid | xargs -I % kill -s USR2 %
-	sleep 1m
+	sleep 50s
 	exit 0
 }
 
 function gonna_be_killed(){
-	cd $here
-	cd ..
-	rm -rf $setup
+	if [ $CONTINUE -ne 0 ] ; then
+		#cp -r * $here
+		if [ -e continue.data ] ; then
+			rm continue.data
+		fi
+
+		ls continue.*.data >& /dev/null
+		if [ $? -eq 0 ] ; then
+			tar cf - continue.*.data | gzip - > continue.data
+			rm continue.*.data
+			cp continue.data $here/ >& /dev/null
+		fi
+
+		rm $here/running
+	else
+		cd $here
+		cd ..
+		rm -rf $setup
+	fi
+
 	echo "I know I must stop $setup"
 	killall $(basename $COMMAND)
 	if [ $CPU -ne 1 ] ; then
@@ -70,6 +87,8 @@ export RM_DATA=$(xml sel -t -m "/xml/rm_data" -v @value rules.xml)
 export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
 export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 export COMPRESSED_DATA=$(xml sel -t -m "/xml/compressed_data" -v @value rules.xml)
+export END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
+export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
 
 if [ ! -e $COMMAND ] ; then
 	echo "$COMMAND doesn't exists"
@@ -98,6 +117,16 @@ function thread_run(){
 	tmp_dir=`mktemp -d`
 	here=`pwd`
 	trap gonna_be_killed USR2
+	if [ $CONTINUE -ne 0 ] ; then
+		#cp -r * $tmp_dir/
+		if [ -e continue.data ] ; then
+			cp continue.data $tmp_dir/
+			cd $tmp_dir/
+			tar zxf continue.data
+			rm continue.data
+			cd $here
+		fi
+	fi
 	cp $CONFIG_FILE $tmp_dir
 	cp $COMMAND $tmp_dir
 	if [[ ! $DATA == "" ]] ; then
@@ -112,13 +141,40 @@ function thread_run(){
 		cd $here
 	fi
 	args=$(cpFileFromArgs $tmp_dir "$ARGS")
+        if [ $CONTINUE -ne 0 ] ; then
+                args="$args --continue" 
+        fi
 	cd $tmp_dir/
 	executable="./$(basename $COMMAND)"
 	chmod +x $executable
 	echo "$executable $args >& full.trace"
 
 	$executable $args >& full.trace &
-	wait $!
+	last_pid=$!
+	if [ $CONTINUE -ne 0 ] ; then
+		while [ 1 ] ; do
+			sleep 30m &
+			wait $!
+			#cp -r * $here/
+			if [ -e continue.data ] ; then
+				rm continue.data
+			fi
+			
+			ls continue.*.data >& /dev/null
+			if [ $? -eq 0 ] ; then
+				tar cf - continue.*.data | gzip -9 - > continue.data
+				rm continue.*.data
+				cp continue.data $here/ >& /dev/null
+			fi
+
+			kill -0 $last_pid >& /dev/null
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+		done
+	fi
+
+	wait $last_pid
 	result=$?
 
 	echo $result >> full.trace
@@ -145,6 +201,11 @@ function thread_run(){
 	fi
 
 	cd $here
+	if [ $CONTINUE -ne 0 ] ; then
+		cp config.ini $tmp_dir/
+		cp host $tmp_dir/
+		rm -rf *
+	fi
 	mv $tmp_dir/* .
 	rmdir $tmp_dir
 	cd ../..
@@ -169,11 +230,19 @@ for dir in $directories ; do
 
 		if [ ! -e $dir/$setup ] ; then
 			mkdir $dir/$setup
+			touch $dir/$setup/running
 			if [ $CPU -ne 1 ] ; then
 				job_pool_run thread_run $dir $setup "$parameters"
 			else
 				thread_run $dir $setup "$parameters"
 			fi
+		elif [[ $CONTINUE -ne 0 && ! -e $dir/$setup/$END_FILE && ! -e $dir/$setup/running ]] ; then
+			touch $dir/$setup/running
+                        if [ $CPU -ne 1 ] ; then
+                                job_pool_run thread_run $dir $setup "$parameters"
+                        else
+                                thread_run $dir $setup "$parameters"
+                        fi
 		fi
 	done
 	rm $all_todo
