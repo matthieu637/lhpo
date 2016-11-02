@@ -6,6 +6,7 @@ cdIntoFirstArg $@
 project=$(basename $1)
 
 running=0
+starting=0
 empty=0
 finished=0
 
@@ -71,6 +72,7 @@ done
 
 END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
 STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
+export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
 
 directories=`cat rules.out`
 for dir in $directories ; do
@@ -82,7 +84,12 @@ for dir in $directories ; do
 	for setup in $setups ; do
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
-		elif [[ ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ]] ; then
+		# $dir/$setup exists
+		elif [[ $CONTINUE -ne 0 && -e $dir/$setup/running ]] ; then
+			running=`expr $running + 1`
+		elif [[ $CONTINUE -ne 0 && ! -e $dir/$setup/running ]] ; then
+			starting=`expr $starting + 1`
+		elif [[ ( ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ) && $CONTINUE -eq 0 ]] ; then
 			running=`expr $running + 1`
 #			cat $dir/$setup/host
 			if [ $remove_running -eq 1 ] ; then
@@ -135,4 +142,9 @@ done
 echo "running : ${running}"
 echo "to do : ${empty}"
 echo "done : ${finished}"
+
+if [ $CONTINUE -ne 0 ] ; then
+	echo "starting : ${starting}"
+fi
+
 
