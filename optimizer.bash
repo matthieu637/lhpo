@@ -17,6 +17,8 @@ function gonna_be_killed_parrent(){
 
 function gonna_be_killed(){
 	if [ $CONTINUE -ne 0 ] ; then
+		rm $here/running
+
 		#cp -r * $here
 		if [ -e continue.data ] ; then
 			rm continue.data
@@ -26,10 +28,9 @@ function gonna_be_killed(){
 		if [ $? -eq 0 ] ; then
 			tar cf - continue.*.data | gzip - > continue.data
 			rm continue.*.data
-			cp continue.data $here/ >& /dev/null
+			cp continue.data $here/continue.data.tmp >& /dev/null
+			mv $here/continue.data.tmp $here/continue.data
 		fi
-
-		rm $here/running
 	else
 		cd $here
 		cd ..
