@@ -123,8 +123,11 @@ function thread_run(){
 		if [ -e continue.data ] ; then
 			cp continue.data $tmp_dir/
 			cd $tmp_dir/
-			tar zxf continue.data
-			rm continue.data
+			gzip -d -S .data continue.data
+			tar -xf continue
+			rm continue
+			#tar zxf continue.data
+			#rm continue.data
 			cd $here
 		fi
 	fi
