@@ -101,6 +101,10 @@ for dir in $directories ; do
 			if [ $remove_running -eq 1 ] ; then
 				rm $dir/$setup/running
 			fi
+                        if [ $display_run -eq 1 ] ; then
+                            echo "$setup : $(tail -1 $dir/$setup/host)"
+			fi
+				
 		elif [[ $CONTINUE -ne 0 && ! -e $dir/$setup/running ]] ; then
 			starting=`expr $starting + 1`
 		elif [[ ( ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ) && $CONTINUE -eq 0 ]] ; then
