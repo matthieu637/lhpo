@@ -159,6 +159,13 @@ function thread_run(){
 		while [ 1 ] ; do
 			sleep 30m &
 			wait $!
+
+			#test that exec is not finished
+			kill -0 $last_pid >& /dev/null
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+
 			#cp -r * $here/
 			if [ -e continue.data ] ; then
 				rm continue.data
@@ -169,11 +176,6 @@ function thread_run(){
 				tar cf - continue.*.data | gzip -9 - > continue.data
 				rm continue.*.data
 				cp continue.data $here/ >& /dev/null
-			fi
-
-			kill -0 $last_pid >& /dev/null
-			if [ $? -ne 0 ] ; then
-				break
 			fi
 		done
 	fi
