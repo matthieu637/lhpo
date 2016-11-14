@@ -29,6 +29,9 @@ function gonna_be_killed(){
 			tar cf - continue.*.data | gzip - > continue.data
 			rm continue.*.data
 			cp continue.data $here/continue.data.tmp >& /dev/null
+                        if [ -e $here/continue.data ] ; then
+                        	mv $here/continue.data $here/continue.data.old
+                        fi
 			mv $here/continue.data.tmp $here/continue.data
 		fi
 	else
@@ -168,7 +171,11 @@ function thread_run(){
 			if [ $? -eq 0 ] ; then
 				tar cf - continue.*.data | gzip -9 - > continue.data
 				rm continue.*.data
-				cp continue.data $here/ >& /dev/null
+				cp continue.data $here/continue.data.tmp
+				if [ -e $here/continue.data ] ; then
+					mv $here/continue.data $here/continue.data.old
+				fi
+				mv $here/continue.data.tmp $here/continue.data
 			fi
 
 			kill -0 $last_pid >& /dev/null
@@ -191,6 +198,12 @@ function thread_run(){
 		if [ $CONTINUE -ne 0 ] ; then
 			rm $here/continue.data
 			rm $here/running
+			if [ -e $here/continue.data.old ] ; then 
+				#data can be saved
+				mv $here/continue.data.old $here/continue.data
+				#don't rmdir 
+				exit 0
+			fi
 		fi
 		rmdir $here
 		exit 0
