@@ -188,6 +188,10 @@ function thread_run(){
 		cat full.trace
 		rm $here/host
 		rm $here/$CONFIG_FILE
+		if [ $CONTINUE -ne 0 ] ; then
+			rm $here/continue.data
+			rm $here/running
+		fi
 		rmdir $here
 		exit 0
 	fi
