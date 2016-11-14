@@ -29,6 +29,9 @@ function gonna_be_killed(){
 			tar cf - continue.*.data | gzip - > continue.data
 			rm continue.*.data
 			cp continue.data $here/continue.data.tmp >& /dev/null
+                        if [ -e $here/continue.data ] ; then
+                        	mv $here/continue.data $here/continue.data.old
+                        fi
 			mv $here/continue.data.tmp $here/continue.data
 		fi
 	else
@@ -124,10 +127,27 @@ function thread_run(){
 			cp continue.data $tmp_dir/
 			cd $tmp_dir/
 			gzip -d -S .data continue.data
-			tar -xf continue
-			rm continue
-			#tar zxf continue.data
-			#rm continue.data
+			if [ $? -ne 0 ] ; then #archive corrupted
+				if [ -e $here/continue.data.old ] ; then
+					mv $here/continue.data.old $here/continue.data
+					cp $here/continue.data .
+					gzip -d -S .data continue.data
+					if [ $? -ne 0 ] ; then #old archive also corrupted
+						rm $here/continue.data
+					else
+						#saved with old data
+						tar -xf continue
+						rm continue
+					fi
+				else
+					#cannot recover acts as no data before
+					rm $here/continue.data
+					rm continue.data
+				fi
+			else
+				tar -xf continue
+				rm continue
+			fi
 			cd $here
 		fi
 	fi
@@ -175,7 +195,11 @@ function thread_run(){
 			if [ $? -eq 0 ] ; then
 				tar cf - continue.*.data | gzip -9 - > continue.data
 				rm continue.*.data
-				cp continue.data $here/ >& /dev/null
+				cp continue.data $here/continue.data.tmp
+				if [ -e $here/continue.data ] ; then
+					mv $here/continue.data $here/continue.data.old
+				fi
+				mv $here/continue.data.tmp $here/continue.data
 			fi
 		done
 	fi
@@ -190,6 +214,16 @@ function thread_run(){
 		cat full.trace
 		rm $here/host
 		rm $here/$CONFIG_FILE
+		if [ $CONTINUE -ne 0 ] ; then
+			rm $here/continue.data
+			rm $here/running
+			if [ -e $here/continue.data.old ] ; then 
+				#data can be saved
+				mv $here/continue.data.old $here/continue.data
+				#don't rmdir 
+				exit 0
+			fi
+		fi
 		rmdir $here
 		exit 0
 	fi
