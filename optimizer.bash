@@ -127,10 +127,27 @@ function thread_run(){
 			cp continue.data $tmp_dir/
 			cd $tmp_dir/
 			gzip -d -S .data continue.data
-			tar -xf continue
-			rm continue
-			#tar zxf continue.data
-			#rm continue.data
+			if [ $? -ne 0 ] ; then #archive corrupted
+				if [ -e $here/continue.data.old ] ; then
+					mv $here/continue.data.old $here/continue.data
+					cp $here/continue.data .
+					gzip -d -S .data continue.data
+					if [ $? -ne 0 ] ; then #old archive also corrupted
+						rm $here/continue.data
+					else
+						#saved with old data
+						tar -xf continue
+						rm continue
+					fi
+				else
+					#cannot recover acts as no data before
+					rm $here/continue.data
+					rm continue.data
+				fi
+			else
+				tar -xf continue
+				rm continue
+			fi
 			cd $here
 		fi
 	fi
