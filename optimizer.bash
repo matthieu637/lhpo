@@ -226,6 +226,18 @@ function thread_run(){
 		fi
 		rmdir $here
 		exit 0
+	elif [ $CONTINUE -ne 0 ] ; then
+		ls continue.*.data >& /dev/null
+		if [ $? -eq 0 ] ; then
+			tar cf - continue.*.data | gzip -9 - > continue.data
+			rm continue.*.data
+			cp continue.data $here/continue.data.tmp
+			if [ -e $here/continue.data ] ; then
+				mv $here/continue.data $here/continue.data.old
+			fi
+			mv $here/continue.data.tmp $here/continue.data
+		fi
+
 	fi
 	rm $executable
 
