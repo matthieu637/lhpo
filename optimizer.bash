@@ -89,7 +89,7 @@ export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
 export DATA=$(xml sel -t -m "/xml/data" -v @value rules.xml)
 export RM_DATA=$(xml sel -t -m "/xml/rm_data" -v @value rules.xml)
 export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
-export CONFIG_FILE=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
+export CONFIG_FILES=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 export COMPRESSED_DATA=$(xml sel -t -m "/xml/compressed_data" -v @value rules.xml)
 export END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
 export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
@@ -107,12 +107,14 @@ function thread_run(){
 	parameters="$@"
 
 	#configuration
-	cp $CONFIG_FILE $dir/$setup/
+	cp $CONFIG_FILES $dir/$setup/
 	hostname >> $dir/$setup/host
 	i=1
 	for parameter in $parameters ; do
 		value=`echo $setup | cut -d'_' -f$i `
-		sed -i "s/^\($parameter=\)[0-9.truefalse]*$/\1$value/g" $dir/$setup/$CONFIG_FILE
+		for configf in $CONFIG_FILES ; do
+			sed -i "s/^\($parameter=\)[0-9.truefalse]*$/\1$value/g" $dir/$setup/$configf
+		done
 		i=`expr $i + 1`
 	done
 	
@@ -151,7 +153,7 @@ function thread_run(){
 			cd $here
 		fi
 	fi
-	cp $CONFIG_FILE $tmp_dir
+	cp $CONFIG_FILES $tmp_dir
 	cp $COMMAND $tmp_dir
 	if [[ ! $DATA == "" ]] ; then
 		cp $DATA $tmp_dir
@@ -213,10 +215,12 @@ function thread_run(){
 		echo "FAILED : ($tmp_dir)"
 		cat full.trace
 		rm $here/host
-		rm $here/$CONFIG_FILE
+		rm $here/running
+		for configf in $CONFIG_FILES ; do
+			rm $here/$configf
+		done
 		if [ $CONTINUE -ne 0 ] ; then
 			rm $here/continue.data
-			rm $here/running
 			if [ -e $here/continue.data.old ] ; then 
 				#data can be saved
 				mv $here/continue.data.old $here/continue.data
@@ -254,7 +258,7 @@ function thread_run(){
 
 	cd $here
 	if [ $CONTINUE -ne 0 ] ; then
-		cp config.ini $tmp_dir/
+		cp $CONFIG_FILES $tmp_dir/
 		cp host $tmp_dir/
 		rm -rf *
 	fi
