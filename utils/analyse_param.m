@@ -13,6 +13,19 @@ rank=str2num(arg_list{8});
 
 printf('\t \t \t \t -> max median \t (ind) max median \t median median \t mean median \t mean low quartile \t mean over 10 last percent \n');
 
+if strfind(vals, ':') >= 0
+       mmin_=str2num(strsplit(vals,':')(1){1});
+       mmax_=str2num(strsplit(vals,':')(2){1});
+       vals='';
+       for i=mmin_:mmax_
+               vals=strcat(vals, num2str(i), ',');
+       endfor
+endif
+
+if strcmp(key, 'run')
+       mmax=mmax+1
+endif
+
 for val=strsplit(vals, ',')
 	clear base
 	base_regx='[a-zA-Z0-9]*';
@@ -48,7 +61,9 @@ for val=strsplit(vals, ',')
 		endif
 	endfor
 
-	base=strcat(base, '_');
+	if ! strcmp(key, 'run')
+		base=strcat(base, '_');
+	endif
 
 	printf('X=load_dirs(%s, %s, %d, %d, %d);\n', base{1,1}, file_to_load, column, save_best, higher_better);
 	try
