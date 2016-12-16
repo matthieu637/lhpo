@@ -11,10 +11,19 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
 	if(debug==1)
 		printf('looking for : %s\n', pattern);
 	endif
+
+	%or treatment
+	if findstr(pattern, '||') > 0
+		b_=findstr(pattern, '(');
+		e_=findstr(pattern, ')');
+		possi=substr(pattern, b_+1, e_- b_ -1);
+		pattern=strrep(pattern, strcat('(',possi,')'), strsplit (possi, '||'));
+	endif
+
 	global valid_dirs;
 	global column=colm;
 	global higher_better=hb;
-	global inter_moving=50;
+	global inter_moving=20;
 	global save_best=sb;
 	valid_dirs = glob(pattern);
 
