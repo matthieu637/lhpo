@@ -113,7 +113,7 @@ function thread_run(){
 	for parameter in $parameters ; do
 		value=`echo $setup | cut -d'_' -f$i `
 		for configf in $CONFIG_FILES ; do
-			sed -i "s/^\($parameter=\)[0-9.truefalse]*$/\1$value/g" $dir/$setup/$configf
+			sed -i "s/^\($parameter=\)[0-9,:.truefalse]*$/\1$value/g" $dir/$setup/$configf
 		done
 		i=`expr $i + 1`
 	done
