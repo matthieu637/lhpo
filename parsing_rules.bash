@@ -43,7 +43,7 @@ for fold in $folds ; do
 	#clear old file
 	echo -n '' > $fold/mixer
 	if [ $nconst -eq 0 ] ; then
-		echo "test=True;" > $fold/mixer
+		echo "True" > $fold/mixer
 	else
 		i=0
 		read -a constraints_type <<< "$constraints_type"
@@ -67,10 +67,9 @@ for fold in $folds ; do
 		sed -i "s/^/(/" $fold/mixer
 		sed -i "s/$/) and /" $fold/mixer
 
-		sed -i '1s/^/test=/' $fold/mixer
 		mv $fold/mixer $fold/mixer.2
 		paste -s $fold/mixer.2 > $fold/mixer
-		sed -i 's/ and $/;/' $fold/mixer
+		sed -i 's/ and $//' $fold/mixer
 	fi
 	#to debug:
 #	cp $fold/mixer $fold/debug.constraints
@@ -78,7 +77,8 @@ for fold in $folds ; do
 	
 	#execute constraints
 	tmp=`mktemp`
-	cat $fold/rules.out | $LHPO_PATH/utils/constraints.py $fold/mixer > $tmp
+	nbline=$(wc -l $fold/rules.out | sed -e 's/^\([0-9]*\) .*/\1/')
+	$LHPO_PATH/utils/constraints.py $fold/mixer $fold/rules.out $nbline > $tmp
 
 	mv $tmp $fold/mixer
 	mv $fold/mixer $fold/rules.out
@@ -88,7 +88,6 @@ for fold in $folds ; do
 	sed -i '2,$'"s/ //g" $fold/rules.out
 	sed -i '2,$'"s/[,]/_/g" $fold/rules.out
 	sed -i '1'"s/[,]//g" $fold/rules.out
-	sed -i "s/_$//g" $fold/rules.out
 
 	echo "$(wc -l $fold/rules.out) runs to do"
 done
