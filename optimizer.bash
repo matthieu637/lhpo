@@ -112,9 +112,18 @@ function thread_run(){
 	i=1
 	for parameter in $parameters ; do
 		value=`echo $setup | cut -d'_' -f$i `
-		for configf in $CONFIG_FILES ; do
+
+		#if parameter is file specific
+		if [ $(echo $parameter | grep -e ':' | wc -l) -eq 1 ] ; then
+			configf=$(echo $parameter | cut -d ':' -f1)
+			parameter=$(echo $parameter | cut -d ':' -f2)
 			sed -i "s/^\($parameter=\)[0-9,:.truefalse]*$/\1$value/g" $dir/$setup/$configf
-		done
+			
+		else
+			for configf in $CONFIG_FILES ; do
+				sed -i "s/^\($parameter=\)[0-9,:.truefalse]*$/\1$value/g" $dir/$setup/$configf
+			done
+		fi
 		i=`expr $i + 1`
 	done
 	
