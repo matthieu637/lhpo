@@ -22,7 +22,7 @@ while line != -1
     if( !strcmp(key, lastkey) )
     	if( i == id )
 	      X=load_dirs(key, file_to_load, column, save_best, higher_better);
-	      Xsub = X(:, (end - floor(size(X,2)/10)):end);
+	      Xsub = X(:, (end - floor(size(X,2)*0.02)):end);
 	      S=statistics(X);
               if higher_better
 %             [uu,vv]= max(S(3,:));
@@ -34,7 +34,7 @@ while line != -1
 	      yy = median(S(3,:));
 	      ww = mean(S(3,:));
 	      zz = mean(S(2,:));
-	      rr = mean(mean(Xsub));
+	      rr = median(median(Xsub));
 	      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr, size(X,1) );
 	      fflush(stdout);
       
@@ -42,7 +42,6 @@ while line != -1
 	        figure
 	        s=plotMedianQ(X, 'r');
 	        title(key);
-		ylim([250 500])
 	      endif
       	      break
 	endif
@@ -53,6 +52,7 @@ while line != -1
 	printf('error');
 	key = substr(line, 1, rindex(line, '_'))
 	lastkey='';
+	i = i+1;
   end_try_catch
 
     line = fgetl (fid);  

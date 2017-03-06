@@ -1,5 +1,5 @@
 				
-function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
+function final = load_dirs (beforef,endf, colm, sb, hb=1, discre=-1, debug=0)
 	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
 		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
 		printf("X=load_dirs ('.', '[0-9.]*learning.data', 6, 1, 0);\n");
@@ -24,6 +24,8 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
 	global column=colm;
 	global higher_better=hb;
 	global inter_moving=20;
+	global discretize=discre;
+%	global discretize=50;
 	global save_best=sb;
 	valid_dirs = glob(pattern);
 
@@ -45,13 +47,15 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
 	endif
 
 	%memory limits -
-	Y=load(valid_dirs{1,1})(:,column);
-	if( (length(valid_dirs)*size(Y,1)) > 10^8)
-		printf('WARNING matrix is too big > 10^8, I am going to shuffle it and take only a subpart\n');
-		valid_dirs=valid_dirs(randperm(length(valid_dirs)));
-		nsize=10^8/size(Y,1);
-		valid_dirs = valid_dirs (1:nsize);
-		clear Y;
+	if (discretize == -1)
+		Y=load(valid_dirs{1,1})(:,column);
+		if( (length(valid_dirs)*size(Y,1)) > 10^7.5)
+			printf('WARNING matrix is too big > 10^7.5 I am going to shuffle it and take only a subpart\n');
+			valid_dirs=valid_dirs(randperm(length(valid_dirs)));
+			nsize=(10^7.5)/size(Y,1);
+			valid_dirs = valid_dirs (1:nsize);
+			clear Y;
+		endif
 	endif
 
 	firstTry=1;
@@ -64,6 +68,10 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, debug=0)
 					X{i} = save_best_policy(X{i}', higher_better)';
 				elseif save_best == 2
 					X{i} = moving_max_policy(X{i}', higher_better, inter_moving)';
+				endif
+				
+				if(discretize != -1)
+					R = R((1:(end/discretize))*discretize, :);
 				endif
 			endfor
 			break

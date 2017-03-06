@@ -27,7 +27,7 @@ while line != -1
         line = fgetl (fid);
 	continue
       endif
-      Xsub = X(:, (end - floor(size(X,2)/10)):end);
+      Xsub = X(:, (end - floor(size(X,2)*0.02)):end);
       Xsub2 = X(:, 1:5);
 
       S=statistics(X);
@@ -47,9 +47,10 @@ while line != -1
       yy = median(S(3,:));
       ww = mean(S(3,:));
       zz = mean(S(2,:));
-      rr = mean(mean(Xsub));
+      rr = median(median(Xsub));
       ss = mean(mean(Xsub)) - mean(mean(Xsub2));
-      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr, ss);
+      tt = size(X, 1);
+      printf('%s (%d) \t \t -> %f\t %f \t %f \t %f \t %f \t %f \t %f \t %f \n', key,i, uu, vv, yy, ww, zz, rr, ss, tt);
       fflush(stdout);
       result(end+1,:)=[i uu vv ww zz rr ss];
       i = i +1;
