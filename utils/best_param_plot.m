@@ -7,6 +7,8 @@ column=str2num(arg_list{3});
 save_best=str2num(arg_list{4});
 higher_better=str2num(arg_list{5});
 id=str2num(arg_list{6});
+ymin=str2num(arg_list{7});
+ymax=str2num(arg_list{8});
 
 fid = fopen ("rules.out");
 line = fgetl (fid); %ignore first line
@@ -41,6 +43,7 @@ while line != -1
 	      if plotme==1
 	        figure
 	        s=plotMedianQ(X, 'r');
+		ylim([ymin ymax])
 	        title(key);
 	      endif
       	      break

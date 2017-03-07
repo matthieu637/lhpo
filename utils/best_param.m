@@ -6,6 +6,8 @@ plotme=str2num(arg_list{2});
 column=str2num(arg_list{3});
 save_best=str2num(arg_list{4});
 higher_better=str2num(arg_list{5});
+ymin=str2num(arg_list{6});
+ymax=str2num(arg_list{7});
 
 split_long_rows(0);
 
@@ -58,6 +60,7 @@ while line != -1
       if plotme==1
         figure
         s=plotMedianQ(X, 'r');
+	ylim([ymin ymax])
         title(key);
       endif
       

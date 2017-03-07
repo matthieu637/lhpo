@@ -4,6 +4,8 @@
 cdIntoFirstArg $@
 
 STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
+Y_MIN=$(xml sel -t -m "/xml/default_stat_file" -v @ymin rules.xml)
+Y_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @ymax rules.xml)
 
 if [ ! -e rules.out ] ; then
 	echo "Please run parsing_rules first"
@@ -75,8 +77,7 @@ if [[ $multiple == "m" ]] ; then
 
 	higher_better=`ask_higher_better`
 
-	COMMAND="best_param.m $STAT_FILE $plot $dimension $save_best $higher_better"
-	#COMMAND="stats.m $STAT_FILE"
+	COMMAND="best_param.m $STAT_FILE $plot $dimension $save_best $higher_better $Y_MIN $Y_MAX"
 elif [[ $multiple == "s" ]] ; then
 	echo "Want do you want to do? only one dimension (s) / plot all dimension (a) : [s]"
 	arg=("s" "a")
@@ -89,13 +90,13 @@ elif [[ $multiple == "s" ]] ; then
 
 		higher_better=`ask_higher_better`
 
-		COMMAND="one_by_one.m $STAT_FILE $dimension $save_best $higher_better"
+		COMMAND="one_by_one.m $STAT_FILE $dimension $save_best $higher_better $Y_MIN $Y_MAX"
 	else
 		save_best=`ask_save_best`
 
 		higher_better=`ask_higher_better`
 
-		COMMAND="one_by_one.m $STAT_FILE $save_best $higher_better"
+		COMMAND="one_by_one.m $STAT_FILE $save_best $higher_better $Y_MIN $Y_MAX"
 	fi
 elif [[ $multiple == "o" ]] ; then
 	dimension=`ask_dimension`
@@ -109,7 +110,7 @@ elif [[ $multiple == "o" ]] ; then
 	plot=1
 	echo "Give id number ?"
 	read -s id
-	COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id"
+	COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id $Y_MIN $Y_MAX"
 	repeat=2
 elif [[ $multiple == "a" ]] ; then
 	dimension=`ask_dimension`
@@ -122,7 +123,7 @@ elif [[ $multiple == "a" ]] ; then
 
 	echo "Give parameter name ?"
 	read name
-	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better"
+	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better $Y_MIN $Y_MAX"
 	repeat=2
 fi
 
@@ -137,7 +138,7 @@ while [ $repeat -ge 1 ] ; do
 			mm=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
 			mm=`expr $mm - 1`
 			rank=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
-			COMMAND="$COMMAND_BASE $name $val $mm $rank"
+			COMMAND="$COMMAND_BASE $name $val $mm $rank $Y_MIN $Y_MAX"
 		fi
 
 		echo "############################ $dir #####################################"
@@ -151,7 +152,7 @@ while [ $repeat -ge 1 ] ; do
 	if [[ $repeat -eq 2 && $multiple == "o" ]] ; then
 		echo "Give id number ?"
 		read -s id
-		COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id"
+		COMMAND="best_param_plot.m $STAT_FILE $plot $dimension $save_best $higher_better $id $Y_MIN $Y_MAX"
 	elif [[ $repeat -eq 2 && $multiple == "a" ]] ; then
 		echo "Give parameter name ?"
 		read name
