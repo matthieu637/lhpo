@@ -7,6 +7,14 @@ STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
 Y_MIN=$(xml sel -t -m "/xml/default_stat_file" -v @ymin rules.xml)
 Y_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @ymax rules.xml)
 
+if [ "$Y_MIN" == "" ] ; then
+	Y_MIN=0
+fi
+if [ "$Y_MAX" == "" ] ; then
+	Y_MAX=500
+fi
+
+
 if [ ! -e rules.out ] ; then
 	echo "Please run parsing_rules first"
 	exit 1
@@ -123,7 +131,7 @@ elif [[ $multiple == "a" ]] ; then
 
 	echo "Give parameter name ?"
 	read name
-	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better $Y_MIN $Y_MAX"
+	COMMAND_BASE="analyse_param.m $STAT_FILE $dimension $save_best $higher_better"
 	repeat=2
 fi
 

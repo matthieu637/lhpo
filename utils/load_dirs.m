@@ -71,7 +71,7 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, discre=-1, debug=0)
 				endif
 				
 				if(discretize != -1)
-					R = R((1:(end/discretize))*discretize, :);
+					X{i} = X{i}((1:(end/discretize))*discretize, :);
 				endif
 			endfor
 			break
