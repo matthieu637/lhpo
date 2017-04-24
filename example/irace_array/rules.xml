@@ -1,0 +1,15 @@
+<xml>
+  <command value='/home/mzimmer/home_ftalc/git/drl/agent/cmaes/build/release/dodev-half-cheetah' />
+	<args value='' />
+	<ini_file value='config.ini' />
+	<end_file value='time_elapsed' />
+	<compressed_data value='*.data' />
+	<rm_data value='actparcmaes.par errcmaes.err' />
+	<default_stat_file value='*.learning.data' ymin='0' ymax='500' />
+
+	<fold name='main' type='irace' >
+		<param name='reset_learning_algo' />
+		<param name='heuristic_devpoints'  />
+        </fold>
+
+</xml>

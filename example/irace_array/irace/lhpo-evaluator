@@ -1,0 +1,60 @@
+#!/bin/bash
+###############################################################################
+# This script is run for each candidate to evaluate it after all
+# candidate configurations have been run on a single instance.
+#
+# Check the examples in examples/
+#
+# PARAMETERS:
+# $1 is the candidate configuration number
+# $2 is the instance id
+# $3 is the seed
+# $4 is the instance name
+# $5 is the number of candidates alive in this iteration
+#
+# ONLY FOR ELITIST RACE: The rest ($* after `shift 5') are the ids of the 
+# candidates alive in this iteration. This list can be used to calculate the 
+# hypervolume using previous execution results.
+#
+# RETURN VALUE:
+# This script should print one numerical value: the cost that must be minimized.
+# Exit with 0 if no error, with 1 in case of error
+###############################################################################
+#echo "$(date +%s) $*" >> debug.evaluator
+CANDIDATE="$1"
+INSTANCEID="$2"
+SEED="$3"
+INSTANCE="$4"
+TOTALCANDIDATES="$5"
+shift 5 || exit 1
+ALLIDS=$*
+fold=main
+
+target_dir=$(cat ../$fold/rules.out.$CANDIDATE.$INSTANCEID.$SEED | tail -n 1)
+#echo "$(date +%s) wait for ../$fold/$target_dir/0.learning.data from ../$fold/rules.out.$CANDIDATE" >> debug.evaluator
+
+#wait upload file
+SLEEPTIME=1
+while [ ! -s "../$fold/$target_dir/0.learning.data" ]; do
+    sleep $SLEEPTIME
+    let "SLEEPTIME += 1"
+done
+
+SLEEPTIME=1
+while [ ! -s "../$fold/$target_dir/time_elapsed" ]; do
+    sleep $SLEEPTIME
+    let "SLEEPTIME += 1"
+done
+
+#wait upload of 0.learning.data
+sleep 1
+
+#maximize column 7 of 0.learning.data
+CAT=cat
+if [ $(file ../$fold/$target_dir/0.learning.data | grep gzip | wc -l) -eq 1  ] ; then
+	CAT=zcat
+fi
+$CAT ../$fold/$target_dir/0.learning.data | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo "-%"
+
+exit 0
+

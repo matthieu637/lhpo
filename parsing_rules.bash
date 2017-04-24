@@ -17,6 +17,7 @@ for fold in $folds ; do
 		mkdir $fold
 	fi
 
+	irace=$(xml sel -t -v "count(/xml/fold[@name='$fold' and @type='irace'])" rules.xml)
 	params=`xml sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
 	echo $params > $fold/rules.out
 	echo -n '' > $fold/mixer
@@ -89,7 +90,15 @@ for fold in $folds ; do
 	sed -i '2,$'"s/[,]/_/g" $fold/rules.out
 	sed -i '1'"s/[,]//g" $fold/rules.out
 
-	echo "$(wc -l $fold/rules.out) runs to do"
+	if [ $irace -eq 1 ] ; then
+		sed -ni '1p;' $fold/rules.out
+		if [ ! -e $fold.irout ] ; then
+			mkdir $fold.irout
+		fi
+		echo "run irace now and then optimizer in a loop"
+	else
+		echo "$(wc -l $fold/rules.out) runs to do"
+	fi
 done
 
 echo "$folds" | sed -e 's/ //g' > rules.out
