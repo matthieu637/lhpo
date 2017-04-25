@@ -18,6 +18,11 @@ for fold in $folds ; do
 	fi
 
 	irace=$(xml sel -t -v "count(/xml/fold[@name='$fold' and @type='irace'])" rules.xml)
+	if [[ $irace -eq 1 && -e $fold/rules.out && $(wc -l $fold/rules.out | cut -f1 -d' ') -ne 1 ]] ; then
+		echo "$fold/rules.out is already populated be careful!"
+		echo "Please run ./clear.bash first if you want to remove rules."
+		continue
+	fi
 	params=`xml sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
 	echo $params > $fold/rules.out
 	echo -n '' > $fold/mixer
