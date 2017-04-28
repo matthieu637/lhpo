@@ -36,18 +36,21 @@ target_dir=$(cat ../$fold/rules.out.$CANDIDATE.$INSTANCEID.$SEED | tail -n 1)
 #wait upload file
 SLEEPTIME=1
 while [ ! -s "../$fold/$target_dir/0.learning.data" ]; do
-    sleep $SLEEPTIME
+    sleep $SLEEPTIME &
+    wait $! >& /dev/null
     let "SLEEPTIME += 1"
 done
 
 SLEEPTIME=1
 while [ ! -s "../$fold/$target_dir/time_elapsed" ]; do
-    sleep $SLEEPTIME
+    sleep $SLEEPTIME &
+    wait $! >& /dev/null
     let "SLEEPTIME += 1"
 done
 
 #wait upload of 0.learning.data
-sleep 1
+sleep 1 &
+wait $! >& /dev/null
 
 #maximize column 7 of 0.learning.data
 CAT=cat
