@@ -91,8 +91,13 @@ for dir in $directories ; do
 				if [ -e $dir/$setup/host ] ; then
 					timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host | tail -1 ) >& /dev/null
 					if [[ !  $? -eq 0 ]] ; then
-						echo "$(cat $dir/$setup/host | tail -1) down, rm $dir/$setup/running"
-						rm $dir/$setup/running
+						#double check
+						sleep 15
+						timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host | tail -1 ) >& /dev/null
+						if [[ !  $? -eq 0 ]] ; then
+							echo "$(cat $dir/$setup/host | tail -1) down, rm $dir/$setup/running"
+							rm $dir/$setup/running
+						fi
 					fi
 				else
 					echo "$dir/$setup/host doesn't exists"
