@@ -1,18 +1,1 @@
-#!/bin/bash
-#echo "$(date +%s) $*" >> debug.runner
-CONFIG_ID=$1
-INSTANCE_ID=$2
-SEED=$3
-INSTANCE=$4
-shift 4 || exit 1
-CONFIG_PARAMS=$*
-fold=main
-
-lhpo_param=$(echo "${CONFIG_PARAMS}" | sed -e 's/ //g')
-run=$(cat ../$fold/rules.out | grep -Fe "${lhpo_param}_" | wc -l)
-run=$(($run + 1))
-echo "${lhpo_param}_${run}" >> ../$fold/rules.out
-echo "${lhpo_param}_${run}" >> ../$fold/rules.out.$CONFIG_ID.$INSTANCE_ID.$SEED
-#echo "$(date +%s) provide ${lhpo_param}_${run} to ../$fold/rules.out.$CONFIG_ID" >> debug.runner
-
-exit 0
+../../../utils/templates/lhpo-runner
