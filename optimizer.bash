@@ -187,8 +187,9 @@ function thread_run(){
 	$executable $args >& full.trace &
 	last_pid=$!
 	if [ $CONTINUE -ne 0 ] ; then
+		counter=0
 		while [ 1 ] ; do
-			sleep 30m &
+			sleep 1m &
 			wait $!
 
 			#test that exec is not finished
@@ -197,21 +198,26 @@ function thread_run(){
 				break
 			fi
 
-			#cp -r * $here/
-			if [ -e continue.data ] ; then
-				rm continue.data
-			fi
-			
-			ls continue.*.data >& /dev/null
-			if [ $? -eq 0 ] ; then
-				tar cf - continue.*.data | gzip -9 - > continue.data
-				rm continue.*.data
-				cp continue.data $here/continue.data.tmp
-				if [ -e $here/continue.data ] ; then
-					mv $here/continue.data $here/continue.data.old
+			#upload each 30 min
+			if [ $counter -ge 30 ] ; then
+				counter=0
+				#cp -r * $here/
+				if [ -e continue.data ] ; then
+					rm continue.data
 				fi
-				mv $here/continue.data.tmp $here/continue.data
+				
+				ls continue.*.data >& /dev/null
+				if [ $? -eq 0 ] ; then
+					tar cf - continue.*.data | gzip -9 - > continue.data
+					rm continue.*.data
+					cp continue.data $here/continue.data.tmp
+					if [ -e $here/continue.data ] ; then
+						mv $here/continue.data $here/continue.data.old
+					fi
+					mv $here/continue.data.tmp $here/continue.data
+				fi
 			fi
+			counter=`expr $counter + 1`
 		done
 	fi
 
