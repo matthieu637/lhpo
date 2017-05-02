@@ -157,7 +157,7 @@ while [ $repeat -ge 1 ] ; do
 
 		tmp1=`mktemp`
 		head -n 1 $dir/rules.out > $tmp1
-		cat $dir/rules.out | sed '1d' | sort >> $tmp1
+		cat $dir/rules.out | sed '1d' | grep -v '^$' | sort >> $tmp1
 		mv $tmp1 $dir/rules.out
 	
 		cd $dir
