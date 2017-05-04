@@ -34,7 +34,7 @@ function gonna_be_killed(){
                         fi
 			mv $here/continue.data.tmp $here/continue.data
 		fi
-	else
+	elif [ -e $here ] ; then
 		cd $here
 		cd ..
 		rm -rf $setup
@@ -271,13 +271,15 @@ function thread_run(){
 		done
 	fi
 
-	cd $here
-	if [ $CONTINUE -ne 0 ] ; then
-		cp $CONFIG_FILES $tmp_dir/
-		cp host $tmp_dir/
-		rm -rf *
+	if [ -e $here ] ; then
+		cd $here
+		if [[ -e $here && $CONTINUE -ne 0 ]] ; then
+			cp $CONFIG_FILES $tmp_dir/
+			cp host $tmp_dir/
+			#rm -rf * #might be too dangerous if $here don't exist anymore
+		fi
+		mv $tmp_dir/* .
 	fi
-	mv $tmp_dir/* .
 	rmdir $tmp_dir
 	cd ../..
 }
