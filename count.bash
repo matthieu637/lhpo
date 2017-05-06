@@ -158,7 +158,7 @@ for dir in $directories ; do
 
 			if [ $reduce_weight -eq 1 ] ; then
 			#for irace
-			    zcat $dir/$setup/0.learning.data | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 > $dir/$setup/reduced.0.learning.data
+			    zcat $dir/$setup/0.learning.data | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo "-%" > $dir/$setup/reduced.0.learning.data
 			    find $dir/$setup/ -type f -not -name "$END_FILE" -not -name "reduced.0.learning.data" -print0 | xargs -I % -0 rm %
 			fi
 		fi
