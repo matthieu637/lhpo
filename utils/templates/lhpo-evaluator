@@ -39,6 +39,12 @@ while [ ! -s "../$fold/$target_dir/0.learning.data" ]; do
     sleep $SLEEPTIME &
     wait $! >& /dev/null
     let "SLEEPTIME += 1"
+    if [ $SLEEPTIME -gt 600 ] ; then
+	SLEEPTIME=600
+    fi
+    if [ -s "../$fold/$target_dir/reduced.0.learning.data" ] ; then
+	break
+    fi
 done
 
 SLEEPTIME=1
@@ -46,18 +52,26 @@ while [ ! -s "../$fold/$target_dir/time_elapsed" ]; do
     sleep $SLEEPTIME &
     wait $! >& /dev/null
     let "SLEEPTIME += 1"
+    if [ $SLEEPTIME -gt 600 ] ; then
+	SLEEPTIME=600
+    fi
 done
 
 #wait upload of 0.learning.data
 sleep 1 &
 wait $! >& /dev/null
 
+STAT_FILE="0.learning.data"
+if [ -s "../$fold/$target_dir/reduced.0.learning.data" ] ; then
+	STAT_FILE="reduced.0.learning.data"
+fi
+
 #maximize column 7 of 0.learning.data
 CAT=cat
-if [ $(file ../$fold/$target_dir/0.learning.data | grep gzip | wc -l) -eq 1  ] ; then
+if [ $(file ../$fold/$target_dir/$STAT_FILE | grep gzip | wc -l) -eq 1  ] ; then
 	CAT=zcat
 fi
-$CAT ../$fold/$target_dir/0.learning.data | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo "-%"
+$CAT ../$fold/$target_dir/$STAT_FILE | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo "-%"
 
 exit 0
 
