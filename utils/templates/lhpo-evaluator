@@ -63,7 +63,9 @@ wait $! >& /dev/null
 
 STAT_FILE="0.learning.data"
 if [ -s "../$fold/$target_dir/reduced.0.learning.data" ] ; then
-	STAT_FILE="reduced.0.learning.data"
+	#STAT_FILE="reduced.0.learning.data"
+	cat ../$fold/$target_dir/reduced.0.learning.data
+	exit 0
 fi
 
 #maximize column 7 of 0.learning.data
