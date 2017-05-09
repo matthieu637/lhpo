@@ -4,6 +4,13 @@
 import fileinput
 import sys
 
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 def listeproduit(L):
 	if len(L)==0: # produit vide
 		return [[]]
@@ -17,7 +24,7 @@ for line in fileinput.input():
 	rline = line.replace('\n','');
 	if rline.count(',') != 0:
 		tab.append(rline.split(','))
-	elif rline.count(':') != 0:
+	elif rline.count(':') == 1 and is_int(rline.split(':')[0]) and is_int(rline.split(':')[1]) and int(rline.split(':')[0]) < int(rline.split(':')[1]):
 		begin=rline.split(':')[0]
 		end=rline.split(':')[1]
 		tab.append([i for i in range(int(begin),int(end))])
