@@ -73,7 +73,7 @@ CAT=cat
 if [ $(file ../$fold/$target_dir/$STAT_FILE | grep gzip | wc -l) -eq 1  ] ; then
 	CAT=zcat
 fi
-$CAT ../$fold/$target_dir/$STAT_FILE | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo "-%"
+$CAT ../$fold/$target_dir/$STAT_FILE | sed 's/  / /g' | cut -d' ' -f7 | sort -rn | head -n 1 | xargs -I % echo '-1 * %' | bc
 
 exit 0
 
