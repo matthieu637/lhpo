@@ -11,8 +11,12 @@ fold=main
 lhpo_param=$(echo "${CONFIG_PARAMS}" | sed -e 's/ //g')
 run=$(cat ../$fold/rules.out | grep -Fe "${lhpo_param}_" | wc -l)
 run=$(($run + 1))
-echo "${lhpo_param}_${run}" >> ../$fold/rules.out
-echo "${lhpo_param}_${run}" >> ../$fold/rules.out.$CONFIG_ID.$INSTANCE_ID.$SEED
+
+#already launched don't run again
+if [ ! -s ../$fold/rules.out.$CONFIG_ID.$INSTANCE_ID.$SEED ] ; then
+	echo "${lhpo_param}_${run}" >> ../$fold/rules.out
+	echo "${lhpo_param}_${run}" >> ../$fold/rules.out.$CONFIG_ID.$INSTANCE_ID.$SEED
+fi
 #echo "$(date +%s) provide ${lhpo_param}_${run} to ../$fold/rules.out.$CONFIG_ID" >> debug.runner
 
 exit 0
