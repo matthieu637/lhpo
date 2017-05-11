@@ -9,6 +9,7 @@ if [ ! -e rules.xml  ] ; then
 fi
 
 folds=`xml sel -t -m "/xml/fold" -v @name -n rules.xml`
+export CONFIG_FILES=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
 
 for fold in $folds ; do
 	echo "found a new fold : $fold"
@@ -29,6 +30,10 @@ for fold in $folds ; do
 
 	for param in $params ; do
 		values=`xml sel -t -m "/xml/fold[@name='$fold']/param[@name='$param']" -v @values -n rules.xml`
+		if [[ $param != "run" && $(grep -e "^$param=" $CONFIG_FILES | wc -l) -eq 0 ]] ; then
+			echo "$param not defined in $CONFIG_FILES"
+			exit 1
+		fi
 		echo $values >> $fold/mixer
 	done
 
