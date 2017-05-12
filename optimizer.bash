@@ -79,7 +79,7 @@ else
 fi
 
 export MAX_CPU=$(xml sel -t -m "/xml/max_cpu" -v @value rules.xml)
-if [[ ! $MAX_CPU == "" ]] ; then
+if [[ ! $MAX_CPU == "" && $MAX_CPU -lt $CPU ]] ; then
 	CPU=$MAX_CPU
 fi
 
