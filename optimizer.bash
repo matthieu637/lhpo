@@ -130,6 +130,7 @@ function thread_run(){
 	#run
 	cd $dir/$setup
 	tmp_dir=`mktemp -d`
+	echo "$(hostname):$tmp_dir" >> host_tmp
 	here=`pwd`
 	trap gonna_be_killed USR2
 	if [ $CONTINUE -ne 0 ] ; then
