@@ -198,8 +198,8 @@ function thread_run(){
 				break
 			fi
 
-			#upload each 30 min
-			if [ $counter -ge 30 ] ; then
+			#upload each 50 min
+			if [ $counter -ge 50 ] ; then
 				counter=0
 				#cp -r * $here/
 				if [ -e continue.data ] ; then
@@ -279,6 +279,9 @@ function thread_run(){
 			#rm -rf * #might be too dangerous if $here don't exist anymore
 		fi
 		mv $tmp_dir/* .
+		if [ -e running ] ; then
+			rm running
+		fi
 	fi
 	rmdir $tmp_dir
 	cd ../..

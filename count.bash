@@ -85,7 +85,7 @@ for dir in $directories ; do
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
 		# $dir/$setup exists
-		elif [[ $CONTINUE -ne 0 && -e $dir/$setup/running ]] ; then
+		elif [[ $CONTINUE -ne 0 && -e $dir/$setup/running && ! -e $dir/$setup/$END_FILE ]] ; then
 			running=`expr $running + 1`
 			if [ $remove_dead_node -eq 1 ] ; then 
 				if [ -e $dir/$setup/host ] ; then
@@ -111,6 +111,9 @@ for dir in $directories ; do
 			fi
 				
 		elif [[ $CONTINUE -ne 0 && ! -e $dir/$setup/running && ! -e $dir/$setup/$END_FILE ]] ; then
+			if [[ $remove_running -eq 1 && ! -e $dir/$setup/continue.data ]] ; then
+				rm -rf $dir/$setup
+			fi
 			starting=`expr $starting + 1`
 		elif [[ ( ! -e $dir/$setup/$END_FILE || ! -s $dir/$setup/$END_FILE ) && $CONTINUE -eq 0 ]] ; then
 			running=`expr $running + 1`
