@@ -7,6 +7,9 @@ from joblib import Parallel, delayed
 import multiprocessing
 import copy
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 #called from exec
 def str2bool(v):
   return v.lower() in ("yes", "true", "1")
@@ -64,6 +67,7 @@ for rule in open(sys.argv[1]).readlines():
 n=int(sys.argv[3])-1
 start=[i for i in range(0,n,int(n/num_cores + 1))]
 start2 = copy.deepcopy(start)
+#eprint(start2, n, int(n/num_cores+1))
 start2.remove(0)
 start2.append(n)
 pool=[]
