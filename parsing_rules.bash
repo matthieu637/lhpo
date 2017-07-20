@@ -25,8 +25,9 @@ for fold in $folds ; do
 		continue
 	fi
 	params=`xml sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
+	fold_mixer=`mktemp`
 	echo $params > $fold/rules.out
-	echo -n '' > $fold/mixer
+	echo -n '' > $fold_mixer
 
 	for param in $params ; do
 		values=`xml sel -t -m "/xml/fold[@name='$fold']/param[@name='$param']" -v @values -n rules.xml`
@@ -34,11 +35,11 @@ for fold in $folds ; do
 			echo "$param not defined in $CONFIG_FILES"
 			exit 1
 		fi
-		echo $values >> $fold/mixer
+		echo $values >> $fold_mixer
 	done
 
 	#enumeration
-	cat $fold/mixer | $LHPO_PATH/utils/enumerate.py >> $fold/rules.out
+	cat $fold_mixer | $LHPO_PATH/utils/enumerate.py >> $fold/rules.out
 	sed -i "s/'//g" $fold/rules.out
 	sed -i "s/[[]//g" $fold/rules.out
 	sed -i "s/[]]//g" $fold/rules.out
@@ -52,15 +53,15 @@ for fold in $folds ; do
 	constraints_type=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @type -n rules.xml`
 
 	#clear old file
-	echo -n '' > $fold/mixer
+	echo -n '' > $fold_mixer
 	if [ $nconst -eq 0 ] ; then
-		echo "True" > $fold/mixer
+		echo "True" > $fold_mixer
 	else
 		i=0
 		read -a constraints_type <<< "$constraints_type"
 		for constraint in "$constraints" ; do
 			if [[ "${constraints_type[$i]}" == 'python' ]] ; then
-				echo "$constraint" >> $fold/mixer
+				echo "$constraint" >> $fold_mixer
 #			elif [[ "${constraints_type[$i]}" == 'bool' ]] ; then
 #				echo ""
 			else
@@ -71,16 +72,17 @@ for fold in $folds ; do
 			i=`expr $i + 1`
 		done
 	
-		sed -i "s/&lt;/</g" $fold/mixer
-		sed -i "s/&gt;/>/g" $fold/mixer
-#		sed -i "s/\([A-Za-z0-9_]\+\)/dico['\1'][i]/g" $fold/mixer
+		sed -i "s/&lt;/</g" $fold_mixer
+		sed -i "s/&gt;/>/g" $fold_mixer
+#		sed -i "s/\([A-Za-z0-9_]\+\)/dico['\1'][i]/g" $fold_mixer
 		
-		sed -i "s/^/(/" $fold/mixer
-		sed -i "s/$/) and /" $fold/mixer
+		sed -i "s/^/(/" $fold_mixer
+		sed -i "s/$/) and /" $fold_mixer
 
-		mv $fold/mixer $fold/mixer.2
-		paste -s $fold/mixer.2 > $fold/mixer
-		sed -i 's/ and $//' $fold/mixer
+		mv $fold_mixer $fold_mixer.2
+		paste -s $fold_mixer.2 > $fold_mixer
+		rm $fold_mixer.2
+		sed -i 's/ and $//' $fold_mixer
 	fi
 	#to debug:
 #	cp $fold/mixer $fold/debug.constraints
@@ -89,10 +91,10 @@ for fold in $folds ; do
 	#execute constraints
 	tmp=`mktemp`
 	nbline=$(wc -l $fold/rules.out | sed -e 's/^\([0-9]*\) .*/\1/')
-	$LHPO_PATH/utils/constraints.py $fold/mixer $fold/rules.out $nbline > $tmp
+	$LHPO_PATH/utils/constraints.py $fold_mixer $fold/rules.out $nbline > $tmp
 
-	mv $tmp $fold/mixer
-	mv $fold/mixer $fold/rules.out
+	mv $tmp $fold_mixer
+	mv $fold_mixer $fold/rules.out
         sed -i "s/'//g" $fold/rules.out
 	sed -i "s/[[]//g" $fold/rules.out
 	sed -i "s/[]]//g" $fold/rules.out
