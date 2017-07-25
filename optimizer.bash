@@ -183,8 +183,9 @@ function thread_run(){
 	cd $tmp_dir/
 	executable="./$(basename $COMMAND)"
 	chmod +x $executable
+	echo "$executable $args" > executable.trace
 	echo "$executable $args >& full.trace"
-
+	
 	$executable $args >& full.trace &
 	last_pid=$!
 	if [ $CONTINUE -ne 0 ] ; then
