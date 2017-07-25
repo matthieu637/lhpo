@@ -26,7 +26,8 @@ for fold in $folds ; do
 	fi
 	params=`xml sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
 	fold_mixer=`mktemp`
-	echo $params > $fold/rules.out
+	fold_rules=`mktemp`
+	echo $params > $fold_rules.out
 	echo -n '' > $fold_mixer
 
 	for param in $params ; do
@@ -39,12 +40,12 @@ for fold in $folds ; do
 	done
 
 	#enumeration
-	cat $fold_mixer | $LHPO_PATH/utils/enumerate.py >> $fold/rules.out
-	sed -i "s/'//g" $fold/rules.out
-	sed -i "s/[[]//g" $fold/rules.out
-	sed -i "s/[]]//g" $fold/rules.out
-	sed -i '2,$'"s/ //g" $fold/rules.out
-	sed -i "s/[,]/_/g" $fold/rules.out
+	cat $fold_mixer | $LHPO_PATH/utils/enumerate.py >> $fold_rules.out
+	sed -i "s/'//g" $fold_rules.out
+	sed -i "s/[[]//g" $fold_rules.out
+	sed -i "s/[]]//g" $fold_rules.out
+	sed -i '2,$'"s/ //g" $fold_rules.out
+	sed -i "s/[,]/_/g" $fold_rules.out
 
 
 	#constraining
@@ -85,32 +86,34 @@ for fold in $folds ; do
 		sed -i 's/ and $//' $fold_mixer
 	fi
 	#to debug:
-#	cp $fold/mixer $fold/debug.constraints
-#	cp $fold/rules.out $fold/debug.prerule
+#	cp $fold_mixer $fold/debug.constraints
+#	cp $fold_rules.out $fold/debug.prerule
 	
 	#execute constraints
 	tmp=`mktemp`
-	nbline=$(wc -l $fold/rules.out | sed -e 's/^\([0-9]*\) .*/\1/')
-	$LHPO_PATH/utils/constraints.py $fold_mixer $fold/rules.out $nbline > $tmp
+	nbline=$(wc -l $fold_rules.out | sed -e 's/^\([0-9]*\) .*/\1/')
+	$LHPO_PATH/utils/constraints.py $fold_mixer $fold_rules.out $nbline > $tmp
 
 	mv $tmp $fold_mixer
-	mv $fold_mixer $fold/rules.out
-        sed -i "s/'//g" $fold/rules.out
-	sed -i "s/[[]//g" $fold/rules.out
-	sed -i "s/[]]//g" $fold/rules.out
-	sed -i '2,$'"s/ //g" $fold/rules.out
-	sed -i '2,$'"s/[,]/_/g" $fold/rules.out
-	sed -i '1'"s/[,]//g" $fold/rules.out
+	mv $fold_mixer $fold_rules.out
+        sed -i "s/'//g" $fold_rules.out
+	sed -i "s/[[]//g" $fold_rules.out
+	sed -i "s/[]]//g" $fold_rules.out
+	sed -i '2,$'"s/ //g" $fold_rules.out
+	sed -i '2,$'"s/[,]/_/g" $fold_rules.out
+	sed -i '1'"s/[,]//g" $fold_rules.out
 
 	if [ $irace -eq 1 ] ; then
-		sed -ni '1p;' $fold/rules.out
+		sed -ni '1p;' $fold_rules.out
 		if [ ! -e $fold.irout ] ; then
 			mkdir $fold.irout
 		fi
 		echo "run irace now and then optimizer in a loop"
 	else
-		echo "$(wc -l $fold/rules.out) runs to do"
+		echo "$(wc -l $fold_rules.out |cut -d ' ' -f1) runs to do"
 	fi
+
+	mv $fold_rules.out $fold/rules.out &> /dev/null
 done
 
 echo "$folds" | sed -e 's/ //g' > rules.out
