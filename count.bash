@@ -138,7 +138,7 @@ for dir in $directories ; do
 				fi
 				if [ $display_progress -eq 1 ] ; then
 					tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
-				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "if [ -e $tmp_path/0.testing.data ] ; then tail -1 $tmp_path/0.testing.data ; else tail -1 $tmp_path/0.learning.data ; fi"
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "if [ -e $tmp_path/0.testing.data ] ; then tail -1 $tmp_path/0.testing.data ; elif [ -e $tmp_path/0.learning.data ] ; then tail -1 $tmp_path/0.learning.data ; fi"
 				fi
                         fi
                         if [ $display_bug -eq 1 ] ; then
