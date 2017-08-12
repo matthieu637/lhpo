@@ -128,7 +128,8 @@ for dir in $directories ; do
 				rm -rf $dir/$setup
 			fi
                         if [ $display_run -eq 1 ] ; then
-                            echo "$setup : $(cat $dir/$setup/host)"
+			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
+                            echo "$setup : $(cat $dir/$setup/host) $tmp_path"
 				if [ $ask_upload -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "find /tmp -maxdepth 1 -type d | grep -e 'tmp[.]' | xargs -I % cp %/0.learning.data ~/home_grid5000/$project/$dir/$setup/"
 					sleep 1s
@@ -137,7 +138,6 @@ for dir in $directories ; do
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
 				fi
 				if [ $display_progress -eq 1 ] ; then
-					tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "if [ -e $tmp_path/0.testing.data ] ; then tail -1 $tmp_path/0.testing.data ; elif [ -e $tmp_path/0.learning.data ] ; then tail -1 $tmp_path/0.learning.data ; fi"
 				fi
                         fi
