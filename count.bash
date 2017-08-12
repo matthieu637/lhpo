@@ -11,6 +11,7 @@ empty=0
 finished=0
 
 display_run=0
+display_progress=0
 display_done=0
 display_bug=0
 remove_running=0
@@ -32,6 +33,10 @@ do
 		;;
 		"--display-run")
 			display_run=1
+		;;
+		"--display-progress")
+			display_run=1
+			display_progress=1
 		;;
 		"--display-done")
 			display_done=1
@@ -129,6 +134,10 @@ for dir in $directories ; do
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
+				fi
+				if [ $display_progress -eq 1 ] ; then
+					tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "tail -1 $tmp_path/0.testing.data"
 				fi
                         fi
                         if [ $display_bug -eq 1 ] ; then
