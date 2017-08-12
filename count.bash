@@ -48,6 +48,7 @@ do
 			echo "usage $0 : <directory with rules.xml> <options>"
 			echo "options :"
 			echo "	--display-run : displaying the path of still running"
+			echo "	--display-progress : displaying the stats file in each node"
 			echo "	--display-bug : displaying the path of still running but seems bugged"
 			echo "	--display-done : displaying the path of done runs"
 			echo "	--help : print this message"
@@ -137,7 +138,7 @@ for dir in $directories ; do
 				fi
 				if [ $display_progress -eq 1 ] ; then
 					tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
-				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "tail -1 $tmp_path/0.testing.data"
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "if [ -e $tmp_path/0.testing.data ] ; then tail -1 $tmp_path/0.testing.data ; else tail -1 $tmp_path/0.learning.data ; fi"
 				fi
                         fi
                         if [ $display_bug -eq 1 ] ; then
