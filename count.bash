@@ -132,7 +132,6 @@ for dir in $directories ; do
                             echo "$setup : $(cat $dir/$setup/host) $tmp_path"
 				if [ $ask_upload -eq 1 ] ; then
 				  	timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "cp $tmp_path/* ~/home_grid5000/$project/$dir/$setup/"
-					sleep 1s
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
