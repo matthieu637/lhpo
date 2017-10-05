@@ -86,12 +86,12 @@ for dir in $directories ; do
 	if [ $reduce_weight -eq 1 ] ; then
 		echo "size before : $(du -BG -s $dir)"
 	fi
+        if [ $display_run -eq 1 ] ; then
+                echo "$dir"
+	fi
+
 
 	for setup in $setups ; do
-                if [ $display_run -eq 1 ] ; then
-                        echo "$setup"
-		fi
-
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
 		# $dir/$setup exists
