@@ -88,6 +88,10 @@ for dir in $directories ; do
 	fi
 
 	for setup in $setups ; do
+                if [ $display_run -eq 1 ] ; then
+                        echo "$setup"
+		fi
+
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
 		# $dir/$setup exists
