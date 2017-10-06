@@ -10,6 +10,8 @@ id=str2num(arg_list{6});
 ymin=str2num(arg_list{7});
 ymax=str2num(arg_list{8});
 
+%plotme=2;
+
 fid = fopen ("rules.out");
 line = fgetl (fid); %ignore first line
 
@@ -23,8 +25,13 @@ while line != -1
     key = substr(line, 1, rindex(line, '_'));
     if( !strcmp(key, lastkey) )
     	if( i == id )
+	      key
 	      X=load_dirs(key, file_to_load, column, save_best, higher_better);
+	      if(size(X,1) == 1)
+	      	X=[X;X;X];
+	      endif
 	      Xsub = X(:, (end - floor(size(X,2)*0.02)):end);
+	      size(X)
 	      S=statistics(X);
               if higher_better
 %             [uu,vv]= max(S(3,:));
@@ -43,17 +50,23 @@ while line != -1
 	      if plotme==1
 	        figure
 	        s=plotMedianQ(X, 'r');
-		ylim([ymin ymax])
+                ylim([ymin ymax])
 	        title(key);
-	      endif
+              elseif plotme==2
+                figure
+                Y=load_dirs(key, file_to_load, 6, 0, 0);
+                plot(statistics(cumsum (Y, 2))(3,:), statistics(X)(3,:));
+                ylim([ymin ymax])
+                title(key);
+      	      endif
       	      break
 	endif
     	i = i +1;
     endif
     lastkey=key;
   catch
-	printf('error');
-	key = substr(line, 1, rindex(line, '_'))
+	printf('error %s\n', lasterror.message);
+	key = substr(line, 1, rindex(line, '_'));
 	lastkey='';
 	i = i+1;
   end_try_catch
@@ -61,4 +74,12 @@ while line != -1
     line = fgetl (fid);  
 endwhile
 
-input("press a key");
+%begin messy prefer --persist --no-gui -q
+%input("press a key");
+function q()
+	exit
+endfunction
+printf("press q to quit\n")
+
+
+
