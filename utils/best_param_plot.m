@@ -25,7 +25,6 @@ while line != -1
     key = substr(line, 1, rindex(line, '_'));
     if( !strcmp(key, lastkey) )
     	if( i == id )
-	      key
 	      X=load_dirs(key, file_to_load, column, save_best, higher_better);
 	      if(size(X,1) == 1)
 	      	X=[X;X;X];
