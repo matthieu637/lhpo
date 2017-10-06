@@ -296,7 +296,7 @@ if [ $CPU -ne 1 ]; then
 fi
 
 #full passage of %100
-directories=`cat rules.out`
+directories=`cat rules.out | shuf`
 for dir in $directories ; do
 	parameters=`head -1 $dir/rules.out`
 
