@@ -130,7 +130,7 @@ function thread_run(){
 	#run
 	cd $dir/$setup
 	tmp_dir=`mktemp -d`
-	echo "$(hostname):$tmp_dir" >> host_tmp
+	echo -n "$(hostname):$tmp_dir" >> host_tmp
 	here=`pwd`
 	trap gonna_be_killed USR2
 	if [ $CONTINUE -ne 0 ] ; then
@@ -188,6 +188,7 @@ function thread_run(){
 	
 	$executable $args >& full.trace &
 	last_pid=$!
+	echo ":$last_pid" >> $here/host_tmp
 	if [ $CONTINUE -ne 0 ] ; then
 		counter=0
 		while [ 1 ] ; do
