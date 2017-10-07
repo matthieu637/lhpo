@@ -20,6 +20,8 @@ reduce_weight=0
 ask_upload=0
 kill_running=0
 
+LIST_RULES="rules.out"
+
 if [ ! -e rules.xml ] ; then
 	echo "rules.xml doesn't exists in $1"
 	exit 1
@@ -56,7 +58,8 @@ do
 			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
 			echo "	--reduce-weight : remove done data (copy them before!) and tricks to not compute them again"
 			echo "	--ask-upload : upload running data even if not finished"
-			echo "	--kill-running : upload running data even if not finished"
+			echo "	--kill-running : kill optimizer process of all running node"
+			echo "	--previous : use rules.out.old instead of rules.out if you don't want to continue an experiment"
 			exit 1
 		;;
 		"--remove-running")
@@ -73,6 +76,11 @@ do
 			ask_upload=1
 			display_run=1
 		;;
+		"--previous")
+			LIST_RULES="rules.out.old"
+		;;
+
+
 	esac
 done
 
@@ -80,9 +88,9 @@ END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
 STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
 export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
 
-directories=`cat rules.out`
+directories=`cat $LIST_RULES`
 for dir in $directories ; do
-	setups=`cat $dir/rules.out | sed -e '1d'`
+	setups=`cat $dir/$LIST_RULES | sed -e '1d'`
 	if [ $reduce_weight -eq 1 ] ; then
 		echo "size before : $(du -BG -s $dir)"
 	fi
