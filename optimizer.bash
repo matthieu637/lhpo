@@ -233,6 +233,7 @@ function thread_run(){
 		echo "FAILED : ($tmp_dir)"
 		cat full.trace
 		rm $here/host
+		rm $here/host_tmp
 		rm $here/running
 		for configf in $CONFIG_FILES ; do
 			rm $here/$configf
@@ -279,6 +280,7 @@ function thread_run(){
 		if [[ -e $here && $CONTINUE -ne 0 ]] ; then
 			cp $CONFIG_FILES $tmp_dir/
 			cp host $tmp_dir/
+			cp host_tmp $tmp_dir/
 			#rm -rf * #might be too dangerous if $here don't exist anymore
 		fi
 		mv $tmp_dir/* .
