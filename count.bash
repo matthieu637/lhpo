@@ -96,7 +96,7 @@ export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
 
 directories=`cat $LIST_RULES`
 for dir in $directories ; do
-	if [ ! -e $dir/$LIST_RULES ] ; 
+	if [ ! -e $dir/$LIST_RULES ] ; then
 		setups=`cat $dir/rules.out | sed -e '1d'`
 	else
 		setups=`cat $dir/$LIST_RULES | sed -e '1d'`
