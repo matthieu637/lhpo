@@ -19,6 +19,7 @@ remove_dead_node=0
 reduce_weight=0
 ask_upload=0
 kill_running=0
+kill_running_pid=0
 
 LIST_RULES="rules.out"
 
@@ -59,6 +60,7 @@ do
 			echo "	--reduce-weight : remove done data (copy them before!) and tricks to not compute them again"
 			echo "	--ask-upload : upload running data even if not finished"
 			echo "	--kill-running : kill optimizer process of all running node"
+			echo "	--kill-running-pid : kill process of all running node"
 			echo "	--previous : use rules.out.old instead of rules.out if you don't want to continue an experiment"
 			exit 1
 		;;
@@ -70,6 +72,10 @@ do
 		;;
 		"--kill-running")
 			kill_running=1
+			display_run=1
+		;;
+		"--kill-running-pid")
+			kill_running_pid=1
 			display_run=1
 		;;
 		"--ask-upload")
@@ -145,12 +151,16 @@ for dir in $directories ; do
 			fi
                         if [ $display_run -eq 1 ] ; then
 			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
-                            echo "$setup : $(cat $dir/$setup/host) $tmp_path"
+			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f3)
+                            echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc"
 				if [ $ask_upload -eq 1 ] ; then
 				  	timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "cp $tmp_path/* ~/home_grid5000/$project/$dir/$setup/"
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
+				fi
+				if [ $kill_running_pid -eq 1 ] ; then
+				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "kill -9 $pidproc"
 				fi
 				if [ $display_progress -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "if [ -e $tmp_path/0.testing.data ] ; then tail -1 $tmp_path/0.testing.data ; elif [ -e $tmp_path/0.learning.data ] ; then tail -1 $tmp_path/0.learning.data ; fi"
