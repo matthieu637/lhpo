@@ -90,7 +90,11 @@ export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
 
 directories=`cat $LIST_RULES`
 for dir in $directories ; do
-	setups=`cat $dir/$LIST_RULES | sed -e '1d'`
+	if [ ! -e $dir/$LIST_RULES ] ; 
+		setups=`cat $dir/rules.out | sed -e '1d'`
+	else
+		setups=`cat $dir/$LIST_RULES | sed -e '1d'`
+	fi
 	if [ $reduce_weight -eq 1 ] ; then
 		echo "size before : $(du -BG -s $dir)"
 	fi
