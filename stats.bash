@@ -7,6 +7,8 @@ STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
 Y_MIN=$(xml sel -t -m "/xml/default_stat_file" -v @ymin rules.xml)
 Y_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @ymax rules.xml)
 X_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @xmax rules.xml)
+PLOT_ARGS="--persist --no-gui -q"
+plot=0
 
 if [ "$Y_MIN" == "" ] ; then
 	Y_MIN=0
@@ -156,13 +158,17 @@ while [ $repeat -ge 1 ] ; do
 		echo "############################ $dir #####################################"
 
 		tmp1=`mktemp`
-		head -n 1 $dir/rules.out > $tmp1
-		cat $dir/rules.out | sed '1d' | grep -v '^$' | sort >> $tmp1
-		mv $tmp1 $dir/rules.out
+		#review sort
+		#head -n 1 $dir/rules.out > $tmp1
+		#cat $dir/rules.out | sed '1d' | grep -v '^$' | sort -n >> $tmp1
+		#mv $tmp1 $dir/rules.out
 	
 		cd $dir
-		echo "OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND"
-		OCTAVE_PATH=$LHPO_PATH/utils octave $LHPO_PATH/utils/$COMMAND
+		if [ $plot -eq 0 ] ; then
+			PLOT_ARGS=""
+		fi
+		echo "OCTAVE_PATH=$LHPO_PATH/utils octave $PLOT_ARGS $LHPO_PATH/utils/$COMMAND"
+		OCTAVE_PATH=$LHPO_PATH/utils octave $PLOT_ARGS $LHPO_PATH/utils/$COMMAND
 		cd ..
 	done
 	

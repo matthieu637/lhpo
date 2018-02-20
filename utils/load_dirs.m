@@ -1,5 +1,5 @@
 				
-function final = load_dirs (beforef,endf, colm, sb, hb=1, discre=-1, debug=0)
+function final = load_dirs (beforef,endf, colm, sb, hb=1, discre=-1, im=50, debug=0)
 	if (nargin < 4 || not(ischar(beforef)) || not(ischar(endf)))
 		printf('usage : load_dirs (path, file, column, save_best, higher_better)\n');
 		printf("X=load_dirs ('.', '[0-9.]*learning.data', 6, 1, 0);\n");
@@ -20,12 +20,13 @@ function final = load_dirs (beforef,endf, colm, sb, hb=1, discre=-1, debug=0)
 		pattern=strrep(pattern, strcat('(',possi,')'), strsplit (possi, '||'));
 	endif
 
+  clear -g
 	global valid_dirs;
 	global column=colm;
 	global higher_better=hb;
-	global inter_moving=20;
+	global inter_moving=im;
 	global discretize=discre;
-%	global discretize=50;
+%	global discretize=100;
 	global save_best=sb;
 	valid_dirs = glob(pattern);
 

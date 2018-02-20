@@ -8,6 +8,7 @@ save_best=str2num(arg_list{4});
 higher_better=str2num(arg_list{5});
 ymin=str2num(arg_list{6});
 ymax=str2num(arg_list{7});
+xmax=str2num(arg_list{8});
 
 split_long_rows(0);
 
@@ -28,6 +29,12 @@ while line != -1
       	lastkey=key;
         line = fgetl (fid);
 	continue
+      endif
+      if xmax > 0
+	X=X(:, 1:xmax);
+      endif
+      if size(X,1) == 1
+      	X=[X;X;X];
       endif
       Xsub = X(:, (end - floor(size(X,2)*0.02)):end);
       Xsub2 = X(:, 1:5);
@@ -134,6 +141,11 @@ printf('##########################################################\n');
 sortrows(result, -7*mult)
 
 if plotme
-	input("press a key");
+%begin messy prefer --persist --no-gui -q
+%input("press a key");
+function q() 
+        exit
+endfunction
+printf("press q to quit\n")
 endif
 
