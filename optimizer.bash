@@ -106,9 +106,14 @@ function thread_run(){
 	shift
 	parameters="$@"
 
+	main_dir=`pwd`
+
 	#configuration
 	cp $CONFIG_FILES $dir/$setup/
 	hostname >> $dir/$setup/host
+	tmp_dir=`mktemp -d`
+	echo -n "$(hostname):$tmp_dir" >> $dir/$setup/host_tmp
+
 	i=1
 	for parameter in $parameters ; do
 		value=`echo $setup | cut -d'_' -f$i `
@@ -129,8 +134,11 @@ function thread_run(){
 	
 	#run
 	cd $dir/$setup
-	tmp_dir=`mktemp -d`
-	echo -n "$(hostname):$tmp_dir" >> host_tmp
+	if [ $? -ne 0 ] then
+		#directory might not exist anymore because of sshfs synchronization
+		cd $main_dir
+		return
+	fi
 	here=`pwd`
 	trap gonna_be_killed USR2
 	if [ $CONTINUE -ne 0 ] ; then
