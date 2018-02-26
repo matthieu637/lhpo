@@ -96,6 +96,7 @@ elif [[ $multiple == "s" ]] ; then
 	echo "Want do you want to do? only one dimension (s) / plot all dimension (a) : [s]"
 	arg=("s" "a")
 	multiple=`read_input_until arg[@]`
+	plot=1
 
 	if [[ $multiple == "s" ]] ; then		
 		dimension=`ask_dimension`
