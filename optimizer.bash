@@ -134,7 +134,7 @@ function thread_run(){
 	
 	#run
 	cd $dir/$setup
-	if [ $? -ne 0 ] then
+	if [ $? -ne 0 ] ; then
 		#directory might not exist anymore because of sshfs synchronization
 		cd $main_dir
 		return
