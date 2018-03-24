@@ -83,6 +83,10 @@ if [[ ! $MAX_CPU == "" && $MAX_CPU -lt $CPU ]] ; then
 	CPU=$MAX_CPU
 fi
 
+if [ $CPU == 0 ] ; then
+	CPU=1
+fi
+
 echo "Number of thread set to $CPU."
 
 export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
