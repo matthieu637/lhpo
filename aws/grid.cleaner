@@ -1,0 +1,10 @@
+cdl
+
+. aws/grid.config
+
+while [ 1 ] ; do 
+	clear 
+	find $NFS_DIR -maxdepth 2 -name rules.out | sed -e 's/\/rules.out//' | xargs -L 1  bash -c 'echo $1 ; ./count.bash $1 --remove-dead-node' argv 
+	sleep $RM_DIR_EACH
+done
+
