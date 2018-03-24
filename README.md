@@ -38,14 +38,14 @@ $ ./clear.bash dir/
 
 ##### How to use with a computer cluster
 - [Grid5000](https://www.grid5000.fr/)
-- [Amazon Web Services](https://github.com/matthieu637/lhpo/tree/master/aws)
+- [Amazon Web Services](https://github.com/matthieu637/lhpo/tree/master/aws) setup
 
 lhpo relies on synchronization by NFS. There is no need to allocate a specific number of resources.
 
 Example with 3 agents controlloing the whole process :
-- [booker] a script checks that there is work remaining (with ./count.bash <dir>), monitor which nodes are free, then makes a reservation
+- [booker] a script checks that there is work remaining (with ./count.bash \<dir\>), monitor which nodes are free, then makes a reservation
 - [cleaner] a script checks that each running work has indeed an online node (they might be
-killed before having the time to remove the allocation), if not the work is tagged to-be-done again (with ./count.bash <dir> --remove-dead-node)
+killed before having the time to remove the allocation), if not the work is tagged to-be-done again (with ./count.bash \<dir\> --remove-dead-node)
 - [optimizer] a script monitors the CPU used by each reserved node, if it remains a free ”slot” it tells
 the node to run another experiment in parallel (because some algorithms can be parallelized on several threads and
 others not)
