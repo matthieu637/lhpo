@@ -3,10 +3,14 @@ Lightweight HyperParameter Optimizer (gridsearch)
 
 Run experiments with different parameters, to average, ...
 ##### Dependencies :
-- python
+- python3
 - xmlstarlet
-- ipython3
+- python3-joblib
 - octave (optional for statistics/graphs)
+```
+#for Ubuntu to have acces to xml as on ArchLinux
+sudo ln -s /usr/bin/xmlstartlet /usr/local/bin/xml
+```
 
 ##### Example :
 Create a rules.xml file in a dir and run
@@ -36,7 +40,7 @@ $ ./clear.bash dir/
 - [Grid5000](https://www.grid5000.fr/)
 - [Amazon Web Services](https://github.com/matthieu637/lhpo/tree/master/aws)
 
-lhpo rely on synchronization by NFS. There is no need to allocate a specific number of resources.
+lhpo relies on synchronization by NFS. There is no need to allocate a specific number of resources.
 
 Example with 3 agents controlloing the whole process :
 - [booker] a script checks that there is work remaining (with ./count.bash <dir>), monitor which nodes are free, then makes a reservation
