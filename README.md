@@ -1,5 +1,5 @@
 # lhpo
-Lightweight HyperParameter Optimizer
+Lightweight HyperParameter Optimizer (gridsearch)
 
 Run experiments with different parameters, to average, ...
 ##### Dependencies :
@@ -31,3 +31,19 @@ If you want to remove all fold in the dir (be careful you'll lost your previous 
 ```bash
 $ ./clear.bash dir/
 ```
+
+##### How to use with a computer cluster
+- [Grid5000](https://www.grid5000.fr/)
+- [Amazon Web Services](https://github.com/matthieu637/lhpo/tree/master/aws)
+
+lhpo rely on synchronization by NFS. There is no need to allocate a specific number of resources.
+
+Example with 3 agents controlloing the whole process :
+- [booker] a script checks that there is work remaining (with ./count.bash <dir>), monitor which nodes are free, then makes a reservation
+- [cleaner] a script checks that each running work has indeed an online node (they might be
+killed before having the time to remove the allocation), if not the work is tagged to-be-done again (with ./count.bash <dir> --remove-dead-node)
+- [optimizer] a script monitors the CPU used by each reserved node, if it remains a free ”slot” it tells
+the node to run another experiment in parallel (because some algorithms can be parallelized on several threads and
+others not)
+
+
