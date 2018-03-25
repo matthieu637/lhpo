@@ -43,11 +43,11 @@ $ ./clear.bash dir/
 lhpo relies on synchronization by NFS. There is no need to allocate a specific number of resources.
 
 Example with 3 agents controlloing the whole process :
-- [booker] a script checks that there is work remaining (with ./count.bash \<dir\>), monitor which nodes are free, then makes a reservation
-- [cleaner] a script checks that each running work has indeed an online node (they might be
+- [grid.booker] a script checks that there is work remaining (with ./count.bash \<dir\>), monitor which nodes are free, then makes a reservation
+- [grid.cleaner] a script checks that each running work has indeed an online node (they might be
 killed before having the time to remove the allocation), if not the work is tagged to-be-done again (with ./count.bash \<dir\> --remove-dead-node)
-- [optimizer] a script monitors the CPU used by each reserved node, if it remains a free ”slot” it tells
+- [grid.balancer] a script monitors the CPU used by each reserved node, if it remains a free ”slot” it tells
 the node to run another experiment in parallel (because some algorithms can be parallelized on several threads and
 others not)
 
-
+Scripts for those behaviors are given is aws/grid5000 directories.
