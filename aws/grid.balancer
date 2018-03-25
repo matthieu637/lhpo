@@ -1,0 +1,101 @@
+#!/bin/bash
+
+. grid.config
+
+SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o HashKnownHosts=no -o ConnectTimeout=5 -i .ssh/id_rsa_clust"
+
+function relaunch(){
+       new_work=$(echo "$WORKS" | shuf | head -n 1)
+       node=$1
+       work="cd $LHPO_PATH && ./optimizer.bash $NFS_DIR/$new_work $2"
+       $SSH -q -nt $MAIN_USER@$node "screen -dm bash --login -c \"$work ; exec bash\""
+       sleep 8s
+}
+
+function next_work(){
+        works=`find $NFS_DIR -maxdepth 2 -name rules.out | xargs -L 1 dirname | xargs -L 1 basename`
+        for work in ${works[@]} 
+        do
+                CONTINUE=$(xml sel -t -v "count(/xml/continue)"  $NFS_DIR/$work/rules.xml)
+                END_FILE=$(xml sel -t -m "/xml/end_file" -v @value $NFS_DIR/$work/rules.xml)
+                for dir in $(cat $NFS_DIR/$work/rules.out)
+                do
+                        if [ ! -e $NFS_DIR/$work/$dir/rules.out ] ; then
+                                continue
+                        fi
+
+                        stop_after=0
+                        setups=`cat $NFS_DIR/$work/$dir/rules.out | sed -e '1d' | shuf`
+                        for setup in $setups ; do
+                                if [ ! -e $NFS_DIR/$work/$dir/$setup ] ; then
+                                        echo $work 
+                                        stop_after=1
+                                        break
+                                #exists
+                                elif [[ $CONTINUE -ne 0 && ! -e $NFS_DIR/$work/$dir/$setup/running && ! -e $NFS_DIR/$work/$dir/$setup/$END_FILE ]] ; then
+                                        echo $work
+                                        stop_after=1
+                                        break
+                                fi
+                        done
+
+                        if [ $stop_after -eq 1 ] ; then
+                                break
+                        fi
+                done
+        done
+}
+
+#in case of distant nfs access
+#WORKS=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o HashKnownHosts=no  -i .ssh/id_rsa_clust $MAIN_USER@nancy.grid5000.fr next_work)
+WORKS=`next_work`
+
+if [[ $WORKS == "" ]] ; then
+        echo "no more work to do"
+        exit 0
+else
+        echo "recover all nodes, going to dispatch :"
+        echo "$WORKS"
+fi
+
+if [ -e ~/.ssh/known_hosts ] ; then
+        rm ~/.ssh/known_hosts
+fi
+
+all_node_file=`mktemp`
+
+#all running nodes
+aws ec2 describe-instances --filters Name=instance-state-code,Values=16 --query 'Reservations[].Instances[].[PrivateIpAddress,Tags[?Key==`Name`].Value[]]' --output text | sed '$!N;s/\n/ /' | cut -f1 -d' ' >> $all_node_file
+
+#remove all node that works hard
+for node in $(cat $all_node_file) ; do
+        nodeidle=`timeout -s SIGKILL 3 $SSH $MAIN_USER@$node $LHPO_PATH/aws/cpu_usage.bash 2> /dev/null`
+        if [ $? -ne 0 ]; then
+                echo "?? ($node) bugged or booting"
+        elif [ $nodeidle -lt 95 ] ; then
+                uptime=`timeout -s SIGKILL 3 $SSH $MAIN_USER@$node 'let tDiff=($(date +%s)-$(date --date="$(uptime -s)" +%s))/60;echo $tDiff'`
+                if [ $? -ne 0 ]; then
+                        echo "?? ($node) bugged"
+                elif [ $uptime -gt 6 ] ; then
+                        nbcpu=`timeout -s SIGKILL 3 $SSH $MAIN_USER@$node 'cat /proc/cpuinfo | grep processor | wc -l'`
+                        nbscreen=`timeout -s SIGKILL 3 $SSH $MAIN_USER@$node 'ps aux | grep SCREEN | grep -v grep | wc -l'`
+                        let mcpu="${nbcpu}-2"
+                        let supportable_charge="(100/$nbcpu)*$mcpu"
+                        let supportable_charge_approx="$supportable_charge-4"
+                        let cpu_used="(99+$nbcpu*$nodeidle)/100"
+                        if [[ $nbscreen -ge 70 ]] ; then
+                                echo "$node                     : $nodeidle < $supportable_charge | $cpu_used/$nbcpu ($uptime -- $nbscreen )    [deploy failed]"
+                        elif [[ $nodeidle -lt $supportable_charge_approx && $cpu_used -lt $mcpu ]] ; then
+                                echo "$node                     : $nodeidle < $supportable_charge | $cpu_used/$nbcpu ($uptime -- $nbscreen )    [relaunch]"
+                                let more_cpu_free="$mcpu-$cpu_used"
+                                relaunch $node $more_cpu_free
+                        else
+                                echo "$node                     : $nodeidle < $supportable_charge | $cpu_used/$nbcpu ($uptime -- $nbscreen )    [ok]"
+                        fi
+                fi
+        fi
+done
+
+rm $all_node_file
+exit 0
+
