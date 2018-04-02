@@ -3,11 +3,43 @@
 
 SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o HashKnownHosts=no -o ConnectTimeout=5 -i ~/.ssh/id_rsa_clust"
 
+multi_site=0
+shutdown_unused_node=0
+
+for arg in "$@"
+do
+	case $arg in
+		"--shutdown-unused-node")
+			shutdown_unused_node=1
+		;;
+		"--multi-site")
+			multi_site=1
+		;;
+		"-h"|"--help")
+			echo "  --help : print this message"
+			echo "  --shutdown-unused-node : send shutdown command to node with 0 cpu usage"
+			echo "  --multi-site : perform command on every site"
+			exit 1
+		;;
+		*)
+			echo "usage: $(basename $0) [options]"
+			exit 1
+		;;
+	esac
+done
+
 while [ 1 ] ; do
 	clear
 	all_node_file=`mktemp`
         hostname
-	aws ec2 describe-instances --filters Name=instance-state-code,Values=16 --query 'Reservations[].Instances[].[PrivateIpAddress,Tags[?Key==`Name`].Value[]]' --output text | sed '$!N;s/\n/ /' | cut -f1 -d' ' >> $all_node_file
+	if [ $multi_site -eq 1 ] ; then
+		for region in `aws ec2 describe-regions --output text | cut -f3`
+		do
+			aws ec2 describe-instances --region $region --filters Name=instance-state-code,Values=16 --query 'Reservations[].Instances[].PublicIpAddress[]' --output json | jq -r '.[]' >> $all_node_file
+		done
+	else
+		aws ec2 describe-instances --filters Name=instance-state-code,Values=16 --query 'Reservations[].Instances[].PublicIpAddress[]' --output json | jq -r '.[]' >> $all_node_file
+	fi
         idle=0
         nb_job=0
         for node in $(cat $all_node_file) ; do
@@ -19,6 +51,16 @@ while [ 1 ] ; do
                 echo $nodeidle
                 if [ $nodeidle -lt 30 ] ; then
                         idle=`expr $idle + 1`
+			if [[ $shutdown_unused_node -eq 1 && $nodeidle -le 1 ]] ; then
+                		nodehn=`timeout -s SIGKILL 5 $SSH $MAIN_USER@$node hostname 2> /dev/null`
+		                if [ $? -ne 0 ]; then
+		                        continue
+		                fi
+				if [[ $(hostname) != $nodehn ]] ; then
+					timeout -s SIGKILL 5 $SSH $MAIN_USER@$node sudo shutdown 2> /dev/null
+					echo "shutdown $nodehn ($node)"
+				fi
+			fi
                 fi
                 nb_job=`expr $nb_job + 1`
         done
@@ -27,5 +69,4 @@ while [ 1 ] ; do
 	rm $all_node_file
 	sleep 1m
 done
-
 
