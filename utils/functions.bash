@@ -24,5 +24,7 @@ function nbcpu(){
 
 if [ -e /etc/debian_version ] ; then
 	XML=/usr/bin/xmlstarlet
+else
+	XML=xml
 fi
 
