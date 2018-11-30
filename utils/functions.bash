@@ -22,3 +22,7 @@ function nbcpu(){
 	cat /proc/cpuinfo | grep processor | wc -l
 }
 
+if [ -e /etc/debian_version ] ; then
+	XML=/usr/bin/xmlstarlet
+fi
+

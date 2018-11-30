@@ -3,10 +3,10 @@
 . ./utils/functions.bash
 cdIntoFirstArg $@
 
-STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
-Y_MIN=$(xml sel -t -m "/xml/default_stat_file" -v @ymin rules.xml)
-Y_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @ymax rules.xml)
-X_MAX=$(xml sel -t -m "/xml/default_stat_file" -v @xmax rules.xml)
+STAT_FILE=$($XML sel -t -m "/xml/default_stat_file" -v @value rules.xml)
+Y_MIN=$($XML sel -t -m "/xml/default_stat_file" -v @ymin rules.xml)
+Y_MAX=$($XML sel -t -m "/xml/default_stat_file" -v @ymax rules.xml)
+X_MAX=$($XML sel -t -m "/xml/default_stat_file" -v @xmax rules.xml)
 PLOT_ARGS="--persist --no-gui -q"
 plot=0
 
@@ -149,10 +149,10 @@ while [ $repeat -ge 1 ] ; do
 	for dir in $directories ; do
 		
 		if [[ $multiple == "a" ]] ; then
-			val=`xml sel -t -m "/xml/fold[@name='$dir']/param[@name='$name']" -v @values -n rules.xml`
-			mm=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
+			val=`$XML sel -t -m "/xml/fold[@name='$dir']/param[@name='$name']" -v @values -n rules.xml`
+			mm=`$XML sel -t -m "/xml/fold[@name='$dir']/param" -v @values -n rules.xml | wc -l`
 			mm=`expr $mm - 1`
-			rank=`xml sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
+			rank=`$XML sel -t -m "/xml/fold[@name='$dir']/param" -v @name -n rules.xml | grep -n $name | sed -e 's/:.*//'`
 			COMMAND="$COMMAND_BASE $name $val $mm $rank $Y_MIN $Y_MAX $X_MAX"
 		fi
 

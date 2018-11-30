@@ -90,9 +90,9 @@ do
 	esac
 done
 
-END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
-STAT_FILE=$(xml sel -t -m "/xml/default_stat_file" -v @value rules.xml)
-export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
+END_FILE=$($XML sel -t -m "/xml/end_file" -v @value rules.xml)
+STAT_FILE=$($XML sel -t -m "/xml/default_stat_file" -v @value rules.xml)
+export CONTINUE=$($XML sel -t -v "count(/xml/continue)" rules.xml)
 
 directories=`cat $LIST_RULES`
 for dir in $directories ; do

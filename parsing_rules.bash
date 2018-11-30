@@ -8,8 +8,8 @@ if [ ! -e rules.xml  ] ; then
 	exit 1
 fi
 
-folds=`xml sel -t -m "/xml/fold" -v @name -n rules.xml`
-export CONFIG_FILES=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
+folds=`$XML sel -t -m "/xml/fold" -v @name -n rules.xml`
+export CONFIG_FILES=$($XML sel -t -m "/xml/ini_file" -v @value rules.xml)
 
 for fold in $folds ; do
 	echo "found a new fold : $fold"
@@ -18,20 +18,20 @@ for fold in $folds ; do
 		mkdir $fold
 	fi
 
-	irace=$(xml sel -t -v "count(/xml/fold[@name='$fold' and @type='irace'])" rules.xml)
+	irace=$($XML sel -t -v "count(/xml/fold[@name='$fold' and @type='irace'])" rules.xml)
 	if [[ $irace -eq 1 && -e $fold/rules.out && $(wc -l $fold/rules.out | cut -f1 -d' ') -ne 1 ]] ; then
 		echo "$fold/rules.out is already populated be careful!"
 		echo "Please run ./clear.bash first if you want to remove rules."
 		continue
 	fi
-	params=`xml sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
+	params=`$XML sel -t -m "/xml/fold[@name='$fold']/param" -v @name -n rules.xml`
 	fold_mixer=`mktemp`
 	fold_rules=`mktemp`
 	echo $params > $fold_rules.out
 	echo -n '' > $fold_mixer
 
 	for param in $params ; do
-		values=`xml sel -t -m "/xml/fold[@name='$fold']/param[@name='$param']" -v @values -n rules.xml`
+		values=`$XML sel -t -m "/xml/fold[@name='$fold']/param[@name='$param']" -v @values -n rules.xml`
 		if [[ $param != "run" && $(grep -e "^$param=" $CONFIG_FILES | wc -l) -eq 0 ]] ; then
 			echo "$param not defined in $CONFIG_FILES"
 			exit 1
@@ -49,9 +49,9 @@ for fold in $folds ; do
 
 
 	#constraining
-	nconst=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml | wc -l`
-	constraints=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml`
-	constraints_type=`xml sel -t -m "/xml/fold[@name='$fold']/rule" -v @type -n rules.xml`
+	nconst=`$XML sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml | wc -l`
+	constraints=`$XML sel -t -m "/xml/fold[@name='$fold']/rule" -v @constraint -n rules.xml`
+	constraints_type=`$XML sel -t -m "/xml/fold[@name='$fold']/rule" -v @type -n rules.xml`
 
 	#clear old file
 	echo -n '' > $fold_mixer

@@ -78,7 +78,7 @@ else
 	CPU=$max_cpu
 fi
 
-export MAX_CPU=$(xml sel -t -m "/xml/max_cpu" -v @value rules.xml)
+export MAX_CPU=$($XML sel -t -m "/xml/max_cpu" -v @value rules.xml)
 if [[ ! $MAX_CPU == "" && $MAX_CPU -lt $CPU ]] ; then
 	CPU=$MAX_CPU
 fi
@@ -89,14 +89,14 @@ fi
 
 echo "Number of thread set to $CPU."
 
-export COMMAND=$(xml sel -t -m "/xml/command" -v @value rules.xml)
-export DATA=$(xml sel -t -m "/xml/data" -v @value rules.xml)
-export RM_DATA=$(xml sel -t -m "/xml/rm_data" -v @value rules.xml)
-export ARGS=$(xml sel -t -m "/xml/args" -v @value rules.xml)
-export CONFIG_FILES=$(xml sel -t -m "/xml/ini_file" -v @value rules.xml)
-export COMPRESSED_DATA=$(xml sel -t -m "/xml/compressed_data" -v @value rules.xml)
-export END_FILE=$(xml sel -t -m "/xml/end_file" -v @value rules.xml)
-export CONTINUE=$(xml sel -t -v "count(/xml/continue)" rules.xml)
+export COMMAND=$($XML sel -t -m "/xml/command" -v @value rules.xml)
+export DATA=$($XML sel -t -m "/xml/data" -v @value rules.xml)
+export RM_DATA=$($XML sel -t -m "/xml/rm_data" -v @value rules.xml)
+export ARGS=$($XML sel -t -m "/xml/args" -v @value rules.xml)
+export CONFIG_FILES=$($XML sel -t -m "/xml/ini_file" -v @value rules.xml)
+export COMPRESSED_DATA=$($XML sel -t -m "/xml/compressed_data" -v @value rules.xml)
+export END_FILE=$($XML sel -t -m "/xml/end_file" -v @value rules.xml)
+export CONTINUE=$($XML sel -t -v "count(/xml/continue)" rules.xml)
 
 if [ ! -e $COMMAND ] ; then
 	echo "$COMMAND doesn't exists"
@@ -126,11 +126,11 @@ function thread_run(){
 		if [ $(echo $parameter | grep -e ':' | wc -l) -eq 1 ] ; then
 			configf=$(echo $parameter | cut -d ':' -f1)
 			parameter=$(echo $parameter | cut -d ':' -f2)
-			sed -i "s/^\($parameter=\)[0-9,:.truefalse-]*$/\1$value/g" $dir/$setup/$configf
+			sed -i "s/^\($parameter=\)[0-9,:.truefalse-a-zA-Z]*$/\1$value/g" $dir/$setup/$configf
 			
 		else
 			for configf in $CONFIG_FILES ; do
-				sed -i "s/^\($parameter=\)[0-9,:.truefalse-]*$/\1$value/g" $dir/$setup/$configf
+				sed -i "s/^\($parameter=\)[0-9,:.truefalse-a-zA-Z]*$/\1$value/g" $dir/$setup/$configf
 			done
 		fi
 		i=`expr $i + 1`
