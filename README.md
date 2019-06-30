@@ -2,7 +2,7 @@
 Lightweight HyperParameter Optimizer (gridsearch)
 
 Run experiments with different parameters, to average, ...
-##### Dependencies :
+### Dependencies :
 - python3
 - xmlstarlet
 - python3-joblib
@@ -14,7 +14,7 @@ sudo ln -s /usr/bin/xmlstartlet /usr/local/bin/xml
 alias xml='/usr/bin/xmlstarlet'
 ```
 
-##### Usage :
+### Usage :
 Create a rules.xml file in a dir and run
 ```bash
 $ ./parsing_rules.bash dir/
@@ -38,7 +38,7 @@ If you want to remove all fold in the dir (be careful you'll lost your previous 
 $ ./clear.bash dir/
 ```
 
-##### How to use with a computer cluster
+### How to use with a computer cluster
 - [Grid5000](https://www.grid5000.fr/)
 - [Amazon Web Services](https://github.com/matthieu637/lhpo/tree/master/aws) setup
 
@@ -54,7 +54,7 @@ others not)
 
 Scripts for those behaviors are given is aws/grid5000 directories.
 
-##### Example (performing a gridsearch to optimize hyperparameters):
+### Example (performing a gridsearch to optimize hyperparameters):
 
 run.py
 ```python
@@ -178,4 +178,84 @@ ls -l DAC_0.1_0.1
 #-> perf.data : data written by script
 #-> testing.data : data written by script
 #-> time_elapsed : number of min to perform this exp
+```
+
+### Example of scripts
+If you want to optimize python executable, you might need to specify first a bash script as "command" in rules.xml in order to activate the python virtual environmnent, etc.
+
+For [DDRL](https://github.com/matthieu637/ddrl):
+```bash
+#!/bin/bash
+
+#define some environment variable
+export LANG=en_US.UTF-8
+export OMP_NUM_THREADS=1
+export MUJOCO_PY_MJKEY_PATH=~/.mujoco/$(hostname)/mjkey.txt
+
+#activate virtual env
+. /home/nfs/mzimmer/git/aaal/scripts/activate.bash
+#run executable
+python -O /home/nfs/mzimmer/git/ddrl/gym/run.py --goal-based
+
+exit $?
+```
+
+For [OpenAI baselines](https://github.com/openai/baselines):
+```bash
+#!/bin/bash
+
+export OMP_NUM_THREADS=1
+
+#activate virtual env
+. /home/nfs/mzimmer/git/aaal/scripts/activate.bash
+
+#convert config.ini to command line args and call baselines
+OPENAI_LOGDIR=. OPENAI_LOG_FORMAT=csv python -O -m baselines.run $(cat config.ini | grep '=' | sed 's/^/--/' | sed 's/$/ /' | xargs echo)
+#store status
+r=$?
+
+#for lhpo compatibility
+echo '0' > time_elapsed
+
+exit $r
+```
+
+For [Augmented Random Search](https://github.com/modestyachts/ARS):
+```bash
+#!/bin/bash
+
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export GOTO_NUM_THREADS=1
+export RCALL_NUM_CPU=1
+
+min_number() {
+    printf "%s\n" "$@" | sort -g | head -n1
+}
+
+. /home/mzimmer/git/aaal/scripts/activate.bash
+PORT=$RANDOM
+WORKER=$(min_number $(cat config.ini | grep 'n_directions' | cut -d'=' -f2) $(cat /proc/cpuinfo | grep processor | wc -l))
+RAYDIR=$(ray start --head --redis-port=$PORT --num-cpus=$WORKER |& grep '/tmp/ray/session' | head -1 | sed 's|.* /tmp|/tmp|' | sed 's|/logs.*||')
+
+python -O /home/mzimmer/git/aaal/build/ARS/code/ars.py --port $PORT --seed $RANDOM --dir_path . --n_workers $WORKER $(cat config.ini | grep '=' | grep -v run | sed 's/^/--/' | sed 's/$/ /' | xargs echo) 
+r=$?
+echo '0' > time_elapsed
+
+if [ $r -ne 0 ] ; then
+    exit $r
+fi
+
+cat log.txt | cut -f4 | grep -v 'timesteps' > x.learning.data
+echo "# { \"t_start\": 1550549468.1440182, \"env_id\": \"$(cat config.ini | grep env | cut -d '=' -f2)\"}" > 0.1.monitor.csv
+cat log.txt | cut -f1,2,3 | sed -e 's/[	]/,/g' >> 0.1.monitor.csv
+rm log.txt
+
+#stop ray for specific port
+kill $(cat $RAYDIR/logs/redis.out | grep pid | sed -e 's/^.*pid=\([0-9]*\),.*$/\1/')
+kill $(cat $RAYDIR/logs/redis-shard_0.out | grep pid | sed -e 's/^.*pid=\([0-9]*\),.*$/\1/')
+kill $(lsof -t $RAYDIR/sockets/plasma_store)
+rm -rf $RAYDIR
+
+exit 0
 ```
