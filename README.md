@@ -2,6 +2,20 @@
 Lightweight HyperParameter Optimizer (gridsearch)
 
 Run experiments with different parameters, to average, ...
+
+If you find this code useful in your research, please consider citing:
+```
+Zimmer, M. (2018). Apprentissage par renforcement développemental (Doctoral dissertation).
+
+@phdthesis{zimmer2018phd,
+  title = {Apprentissage par renforcement développemental},
+  author = {Zimmer, Matthieu},
+  school = {University of Lorraine},
+  year = {2018},
+  month = {January}
+}
+```
+
 ### Dependencies :
 - python3
 - xmlstarlet
