@@ -116,7 +116,7 @@ function thread_run(){
 	cp $CONFIG_FILES $dir/$setup/
 	hostname >> $dir/$setup/host
 	tmp_dir=`mktemp -d`
-	echo -n "$(hostname):$tmp_dir" >> $dir/$setup/host_tmp
+	echo -n "$(hostname):$tmp_dir:$OAR_JOB_ID" >> $dir/$setup/host_tmp
 
 	i=1
 	for parameter in $parameters ; do
