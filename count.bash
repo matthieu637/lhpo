@@ -150,7 +150,7 @@ for dir in $directories ; do
 				rm -rf $dir/$setup
 			fi
                         if [ $display_run -eq 1 ] ; then
-			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f3)
+			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
 			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f4)
                             echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc"
 				if [ $ask_upload -eq 1 ] ; then
