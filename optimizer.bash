@@ -198,7 +198,7 @@ function thread_run(){
 	echo "$executable $args" > executable.trace
 	echo "$executable $args >& full.trace"
 	
-	$executable $args >& full.trace &
+	FOLDNAME=$dir $executable $args >& full.trace &
 	last_pid=$!
 	echo ":$last_pid" >> $here/host_tmp
 	if [ $CONTINUE -ne 0 ] ; then
