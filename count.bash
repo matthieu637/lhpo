@@ -13,6 +13,7 @@ finished=0
 display_run=0
 display_progress=0
 display_done=0
+display_not_done=0
 display_bug=0
 remove_running=0
 remove_dead_node=0
@@ -44,6 +45,9 @@ do
 		"--display-done")
 			display_done=1
 		;;
+		"--display-not-done")
+			display_not_done=1
+		;;
 		"--remove-dead-node")
 			remove_dead_node=1
 		;;
@@ -54,6 +58,7 @@ do
 			echo "	--display-progress : displaying the stats file in each node"
 			echo "	--display-bug : displaying the path of still running but seems bugged"
 			echo "	--display-done : displaying the path of done runs"
+			echo "	--display-not-done : displaying the path of done runs"
 			echo "	--help : print this message"
 			echo "	--remove-running : remove the running directory"
 			echo "	--remove-dead-node : remove the directory when the ping doesn't work"
@@ -78,7 +83,7 @@ do
 			kill_running_pid=1
 			display_run=1
 		;;
-		"--ask-upload")
+		"--ask-upload"|"-u")
 			ask_upload=1
 			display_run=1
 		;;
@@ -112,6 +117,9 @@ for dir in $directories ; do
 	for setup in $setups ; do
 		if [ ! -e $dir/$setup ] ; then
 			empty=`expr $empty + 1`
+            if [[ $display_not_done -eq 1 ]] ; then 
+                echo "$dir/$setup"
+            fi
 		# $dir/$setup exists
 		elif [[ $CONTINUE -ne 0 && -e $dir/$setup/running && ! -e $dir/$setup/$END_FILE ]] ; then
 			running=`expr $running + 1`
@@ -154,7 +162,7 @@ for dir in $directories ; do
 			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f3)
                             echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc"
 				if [ $ask_upload -eq 1 ] ; then
-				  	timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "cp $tmp_path/* ~/home_grid5000/$project/$dir/$setup/"
+				  	timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_grid5000 $(cat $dir/$setup/host) "cp $tmp_path/* ~/exp/$project/$dir/$setup/"
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
@@ -203,7 +211,7 @@ for dir in $directories ; do
 				#find $dir/$setup/ -type f -not -name "$END_FILE" -not -name "reduced.0.learning.data" -print0 | xargs -I % -0 rm %
 				find $dir/$setup/ -type f -not -name "$END_FILE" -not -name "continue.data" -print0 | xargs -I % -0 rm %
 			fi
-		fi
+        fi
 	done
 
 	if [ $reduce_weight -eq 1 ] ; then
