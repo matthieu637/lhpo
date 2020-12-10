@@ -159,10 +159,12 @@ for dir in $directories ; do
 			fi
                         if [ $display_run -eq 1 ] ; then
 			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
-			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f3)
+			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f4)
                             echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc"
 				if [ $ask_upload -eq 1 ] ; then
-				  	timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_grid5000 $(cat $dir/$setup/host) "cp $tmp_path/* ~/exp/$project/$dir/$setup/"
+                    #timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "cp $tmp_path/* ~/home_grid5000/$project/$dir/$setup/"
+                    jobid=$(oarstat -u $USER -f | grep -B 10 "assigned_hostnames = $(cat $dir/$setup/host)" | grep job_array_id | head -1 | sed 's/job_array_id =//g' | sed 's/ //g')
+				  	OAR_JOB_ID=$jobid oarsh $(cat $dir/$setup/host) "cp $tmp_path/* ~/exp/$project/$dir/$setup/"
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
@@ -182,24 +184,41 @@ for dir in $directories ; do
                         fi
 			if [ $remove_dead_node -eq 1 ] ; then 
 				if [ -e $dir/$setup/host ] ; then
-					timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
-					if [[ !  $? -eq 0 ]] ; then
-						#double check
-						sleep 15
-						timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host | tail -1) >& /dev/null
-						if [[ !  $? -eq 0 ]] ; then
-							echo "$(cat $dir/$setup/host | tail -1) down, rm $dir/$setup"
-							rm -r $dir/$setup
-						fi
-					fi
+                    jobid=$(oarstat -u $USER -f | grep -B 10 "assigned_hostnames = $(cat $dir/$setup/host)" | grep job_array_id | head -1 | sed 's/job_array_id =//g' | sed 's/ //g')
+                    OAR_JOB_ID=$jobid oarsh $(cat $dir/$setup/host) "echo -n" >& /dev/null
+                    if [[ $? -eq 0 ]] ; then
+                        pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f4)
+                        ret=$(OAR_JOB_ID=$jobid oarsh $(cat $dir/$setup/host) "ps $pidproc | grep $pidproc | wc -l")
+                        echo $ret
+                        if [[ $ret -eq 1 ]] ; then
+                            echo "still running"
+                        else
+                            echo "pb"
+                            #rm -rf $dir/$setup
+                        fi
+                    else
+                        rm -rf $dir/$setup
+                    fi
+
+#					timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) >& /dev/null
+#					if [[ !  $? -eq 0 ]] ; then
+#						#double check
+#						sleep 15
+#						timeout 10 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host | tail -1) >& /dev/null
+#						if [[ !  $? -eq 0 ]] ; then
+#							echo "$(cat $dir/$setup/host | tail -1) down, rm $dir/$setup"
+#							rm -r $dir/$setup
+#						fi
+#					fi
 				else
 					echo "$dir/$setup/host doesn't exists"
+                    #rm -rf $dir/$setup
 				fi
 			fi
 		elif [[ -e $dir/$setup/$END_FILE ]] ; then
 			finished=`expr $finished + 1`
                         if [ $display_done -eq 1 ] ; then
-                            echo $setup
+                            echo "$setup $(cat $dir/$setup/host) $(cat $dir/$setup/$END_FILE)"
                         fi
 
 			if [ $reduce_weight -eq 1 ] ; then
