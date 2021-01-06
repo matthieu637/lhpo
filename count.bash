@@ -159,12 +159,13 @@ for dir in $directories ; do
 			fi
                         if [ $display_run -eq 1 ] ; then
 			    tmp_path=$(cat $dir/$setup/host_tmp | cut -d ':' -f2)
+			    oarid=$(cat $dir/$setup/host_tmp | cut -d ':' -f3)
 			    pidproc=$(cat $dir/$setup/host_tmp | cut -d ':' -f4)
-                            echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc"
+                            echo "$setup : $(cat $dir/$setup/host) $tmp_path $pidproc $oarid"
 				if [ $ask_upload -eq 1 ] ; then
                     #timeout 120 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "cp $tmp_path/* ~/home_grid5000/$project/$dir/$setup/"
                     jobid=$(oarstat -u $USER -f | grep -B 10 "assigned_hostnames = $(cat $dir/$setup/host)" | grep job_array_id | head -1 | sed 's/job_array_id =//g' | sed 's/ //g')
-				  	OAR_JOB_ID=$jobid oarsh $(cat $dir/$setup/host) "cp $tmp_path/* ~/exp/$project/$dir/$setup/"
+				  	OAR_JOB_ID=$jobid oarsh $(cat $dir/$setup/host) "cp -r $tmp_path/* ~/exp/$project/$dir/$setup/"
 				fi
 				if [ $kill_running -eq 1 ] ; then
 				  	timeout 15 ssh -q -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o HashKnownHosts=no -nt -i ~/.ssh/id_rsa_clust $(cat $dir/$setup/host) "killall -s USR2 optimizer.bash"
